@@ -1,6 +1,6 @@
 {
-  "name": "Jurnal dan Laporan Keuangan",
-  "short_name": "Jurnal Keuangan",
+  "name": "JurnalKu",
+  "short_name": "JurnalKu",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",

@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<title>JurnalKu</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-180.png">
+<meta name="theme-color" content="#2f6fed">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="JurnalKu">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<style>
+:root{--bg:#f6f7f9;--card:#fff;--tx:#1b1f24;--mut:#6b7280;--bd:#e3e6eb;--in:#12a150;--out:#e5484d;--ac:#2f6fed;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#111418;--card:#1a1e24;--tx:#e8eaed;--mut:#9aa3af;--bd:#2a3038;--in:#3ccf7a;--out:#ff6b70;--ac:#6b9bff;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#111418;--card:#1a1e24;--tx:#e8eaed;--mut:#9aa3af;--bd:#2a3038;--in:#3ccf7a;--out:#ff6b70;--ac:#6b9bff;color-scheme:dark}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--tx);font:15px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+main{max-width:640px;margin:0 auto;padding:16px}
+h1{font-size:20px;margin:4px 0 4px}
+h2{font-size:15px;margin:0 0 10px}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:14px;margin-bottom:14px}
+input,select,button{font:inherit;color:var(--tx);background:var(--bg);border:1px solid var(--bd);border-radius:8px;padding:9px 10px;width:100%;margin-bottom:8px}
+button{cursor:pointer}
+button.p{background:var(--ac);border-color:var(--ac);color:#fff;font-weight:600}
+.tabs{display:flex;gap:6px;margin-bottom:14px}
+.tabs button{margin:0;font-size:13px;padding:8px 4px}
+.tabs button.on{background:var(--ac);border-color:var(--ac);color:#fff}
+.top{display:flex;gap:8px;align-items:center}
+.top select{flex:1;margin:0}.top button{width:auto;margin:0;white-space:nowrap}
+#st{color:var(--mut);font-size:13px;margin:6px 0 12px;min-height:1.2em}
+label{display:block;font-size:12px;color:var(--mut);margin-bottom:3px}
+table{width:100%;border-collapse:collapse;font-size:14px}
+td{padding:5px 0;border-bottom:1px solid var(--bd)}
+td:last-child{text-align:right;white-space:nowrap}
+tr.t td{font-weight:700;border-bottom:0}
+.h{color:var(--mut);font-size:12px;text-transform:uppercase;padding-top:12px}
+.m{color:var(--mut);font-size:12px}
+.in{color:var(--in)}.out{color:var(--out)}
+.sec{display:none}.sec.on{display:block}
+
+.tabs{overflow-x:auto}
+.tabs button{flex:1 0 auto;width:auto;white-space:nowrap;padding:8px 12px}
+.bb{font-size:13px}
+.bb td{padding:5px 6px}
+.bb td.r{text-align:right;white-space:nowrap}
+.bb tr.h2 td{color:var(--mut);font-size:12px;border-bottom:2px solid var(--bd)}
+.scroll{overflow-x:auto}
+#login{text-align:center}
+#login p{margin:0 0 12px}
+button.out2{width:auto;margin:0;white-space:nowrap}
+</style>
+</head>
+<body>
+<main>
+<div style="display:flex;align-items:center;gap:10px;margin:4px 0 4px">
+  <img id="logo" src="icon-192.png" width="48" height="48" alt="Logo JurnalKu" style="border-radius:12px;flex:none">
+  <h1 style="margin:0">JurnalKu</h1>
+</div>
+<div id="st">Silakan masuk.</div>
+<div class="card" id="login" style="display:none">
+  <p>Masuk dengan email dan kode akses yang diberikan pemilik aplikasi.</p>
+  <input type="email" id="em" placeholder="Email" autocomplete="username">
+  <input type="password" id="kd" placeholder="Kode akses" autocomplete="current-password">
+  <button type="button" class="p" id="masuk">Masuk</button>
+</div>
+<div id="app" style="display:none">
+<div class="top"><select id="bln" aria-label="Periode"></select><button type="button" id="muat">Muat ulang</button><button type="button" class="out2" id="keluar">Keluar</button></div>
+<div class="tabs" style="margin-top:12px">
+  <button type="button" data-t="jurnal" class="on">Jurnal</button>
+  <button type="button" data-t="kas">Arus kas</button>
+  <button type="button" data-t="lr">Laba rugi</button>
+  <button type="button" data-t="nr">Neraca</button>
+  <button type="button" data-t="bb">Buku besar</button>
+</div>
+
+<div class="sec on" id="s-jurnal">
+  <div class="card">
+    <h2>Tambah jurnal</h2>
+    <label for="tgl">Tanggal</label><input type="date" id="tgl">
+    <label for="ket">Keterangan</label><input type="text" id="ket" placeholder="mis. MAKAN">
+    <label for="nil">Nilai (Rp)</label><input type="number" id="nil" min="0" inputmode="numeric">
+    <label for="deb">Akun debit</label><select id="deb"></select>
+    <label for="kre">Akun kredit</label><select id="kre"></select>
+    <button type="button" class="p" id="simpan">Simpan</button>
+    <div id="st2" class="m" style="color:var(--tx);margin:6px 0"></div>
+    <div class="m">Menulis ke tab CASHFLOW HARIAN pada kolom tanggal, keterangan, nominal, COA debit, dan COA kredit.</div>
+  </div>
+  <div class="card"><h2>Jurnal periode ini</h2><div id="jl"></div></div>
+</div>
+<div class="sec" id="s-kas"><div class="card" id="kas"></div></div>
+<div class="sec" id="s-lr"><div class="card" id="lr"></div></div>
+<div class="sec" id="s-nr"><div class="card" id="nr"></div></div>
+<div class="sec" id="s-bb">
+  <div class="card">
+    <h2>Buku besar</h2>
+    <label for="bbAkun">Akun</label><select id="bbAkun"></select>
+    <label for="bbPer">Periode</label><select id="bbPer"><option value="bln">Bulan terpilih di atas</option><option value="all">Semua periode</option></select>
+  </div>
+  <div id="bb"></div>
+</div>
+</div>
+</main>
+
+<script src="config.js"></script>
+<script>
+var coa=[],jur=[],loaded=false,cD=3,cK=4,sig='';
+function $(i){return document.getElementById(i)}
+function rp(n){return (n<0?'−':'')+'Rp '+Math.abs(Math.round(n)).toLocaleString('id-ID')}
+function esc(s){return String(s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+function st(t){$('st').textContent=t;$('st2').textContent=t}
+function nm(k){var a=coa.filter(function(x){return x.k===k})[0];return k+' '+(a?a.n:'')}
+function num(s){if(typeof s==='number')return s;s=String(s==null?'':s).split(',')[0];var n=parseInt(s.replace(/[^0-9]/g,''),10)||0;return /-/.test(s)?-n:n}
+function pd(s){
+  if(typeof s==='number'){if(s>20000&&s<80000)return new Date(Date.UTC(1899,11,30)+s*86400000).toISOString().slice(0,10);s=String(s)}
+  s=String(s==null?'':s).trim();
+  var m=s.match(/^(\d{4})-(\d{2})-(\d{2})/);if(m)return m[1]+'-'+m[2]+'-'+m[3];
+  m=s.match(/^(\d{2})(\d{2})(\d{2})$/);if(m)return '20'+m[1]+'-'+m[2]+'-'+m[3];
+  m=s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{2,4})$/);if(m)return (m[3].length===2?'20'+m[3]:m[3])+'-'+('0'+m[2]).slice(-2)+'-'+('0'+m[1]).slice(-2);
+  return null;
+}
+var CFG=window.JK||{},cred=null;
+try{cred=JSON.parse(localStorage.getItem('jk-cred')||'null')}catch(e){}
+async function api(act,extra){
+  if(!CFG.API_URL||CFG.API_URL.indexOf('ISI_')===0)throw{code:'config'};
+  if(!cred)throw{code:'auth'};
+  var body=Object.assign({act:act,email:cred.email,kode:cred.kode},extra||{}),r,j;
+  try{r=await fetch(CFG.API_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(body)})}catch(e){throw{code:'net'}}
+  try{j=await r.json()}catch(e){throw{code:'resp'}}
+  if(!j.ok)throw{code:j.code||'err',message:j.error||''};
+  return j;
+}
+function galat(e){
+  var c=e&&e.code;
+  if(c==='config')return 'Alamat API belum diisi. Buka config.js dan isi API_URL.';
+  if(c==='auth')return 'Email atau kode akses salah.';
+  if(c==='locked')return 'Terlalu banyak percobaan. Coba lagi 15 menit.';
+  if(c==='net')return 'Tidak ada koneksi internet.';
+  if(c==='resp')return 'Jawaban server tidak terbaca. Periksa API_URL di config.js dan pastikan deploy Apps Script memakai akses Anyone.';
+  return (e&&e.message)?String(e.message).slice(0,160):'Terjadi kesalahan.';
+}
+function tampilLogin(){$('app').style.display='none';$('login').style.display='block'}
+function bukaApp(){$('login').style.display='none';$('app').style.display='block';muat(false)}
+async function masuk(){
+  var em=$('em').value.trim().toLowerCase(),kd=$('kd').value.trim();
+  if(!em||!kd){st('Isi email dan kode akses.');return}
+  cred={email:em,kode:kd};$('masuk').disabled=true;st('Memeriksa akses...');
+  try{await api('login');try{localStorage.setItem('jk-cred',JSON.stringify(cred))}catch(e){}$('kd').value='';bukaApp()}
+  catch(e){cred=null;st(galat(e))}
+  finally{$('masuk').disabled=false}
+}
+function keluar(){cred=null;loaded=false;try{localStorage.removeItem('jk-cred')}catch(e){}tampilLogin();st('Kamu sudah keluar.')}
+function parseCoa(c){return c.filter(function(r){return /^\d+$/.test(String(r[0]==null?'':r[0]).trim())}).map(function(r){return{k:String(r[0]).trim(),n:String(r[1]==null?'':r[1])}})}
+function isiAkun(){
+  var o='<option value="">Pilih akun</option>'+coa.map(function(a){return '<option value="'+esc(a.k)+'">'+esc(a.k+' '+a.n)+'</option>'}).join('');
+  var d0=$('deb').value,k0=$('kre').value;
+  $('deb').innerHTML=o;$('kre').innerHTML=o;$('deb').value=d0;$('kre').value=k0;
+  isiBB();
+}
+async function muat(quiet){
+  if(!quiet)st('Memuat data...');
+  try{
+    var d=await api('data'),c=d.c,j=d.j,s2=JSON.stringify([c,j]);
+    if(quiet&&s2===sig)return;
+    var coaLama=JSON.stringify(coa);
+    sig=s2;coa=parseCoa(c);jur=[];
+    var hh=(j[0]||[]).map(function(x){return String(x==null?'':x).toUpperCase()});
+    cD=hh.findIndex(function(x){return /DEBIT|D COA/.test(x)});if(cD<0)cD=3;
+    cK=hh.findIndex(function(x){return /KREDIT|K COA/.test(x)});if(cK<0)cK=4;
+    j.forEach(function(r,i){
+      if(i===0)return;
+      var dt=pd(r[0]),D=String(r[cD]==null?'':r[cD]).trim(),K=String(r[cK]==null?'':r[cK]).trim(),v=num(r[2]);
+      if(dt&&/^\d+$/.test(D)&&/^\d+$/.test(K)&&v)jur.push({row:i+1,d:dt,ket:String(r[1]==null?'':r[1]),v:v,D:D,K:K,by:String(r[5]==null?'':r[5])});
+    });
+    loaded=true;
+    var ms={};jur.forEach(function(x){ms[x.d.slice(0,7)]=1});
+    var list=Object.keys(ms).sort().reverse(),cur=$('bln').value;
+    $('bln').innerHTML=list.map(function(m){return '<option>'+m+'</option>'}).join('');
+    if(cur&&ms[cur])$('bln').value=cur;
+    isiAkun();
+    st(quiet?(JSON.stringify(coa)!==coaLama?'Daftar akun diperbarui dari sheet DATABASE COA.':'Data diperbarui dari spreadsheet.'):jur.length+' baris jurnal dan '+coa.length+' akun dimuat.');
+    render();
+  }catch(e){
+    if(e&&e.code==='auth'){cred=null;try{localStorage.removeItem('jk-cred')}catch(x){}tampilLogin();st('Sesi tidak berlaku. Masuk lagi dengan email dan kode akses.');return}
+    if(!quiet)st(galat(e));
+  }
+}
+
+function kasSet(){var s={};coa.forEach(function(a){if(a.k[0]==='1'&&/KAS|BANK|E-?MONEY/i.test(a.n))s[a.k]=1});if(!Object.keys(s).length)s['101']=1;return s}
+function render(){
+  if(!loaded)return;
+  var m=$('bln').value,P=jur.filter(function(x){return x.d.slice(0,7)===m});
+  var upto=jur.filter(function(x){return x.d.slice(0,7)<=m}),before=jur.filter(function(x){return x.d.slice(0,7)<m});
+  // jurnal
+  $('jl').innerHTML=P.length?'<table>'+P.slice().sort(function(a,b){return a.d<b.d?1:-1}).map(function(x){
+    return '<tr><td>'+esc(x.d.slice(8))+' · '+esc(x.ket)+(x.by?' · '+esc(x.by.split('@')[0]):'')+'<div class="m">D '+esc(nm(x.D))+' / K '+esc(nm(x.K))+'</div></td><td>'+rp(x.v)+'</td></tr>'}).join('')+'</table>':'<div class="m">Belum ada jurnal di periode ini.</div>';
+  // arus kas gabungan: kas + bank + e-money
+  var KS=kasSet(),inn={},out={},ti=0,to=0,tr=0;
+  P.forEach(function(x){var a=KS[x.D],b=KS[x.K];if(a&&!b){inn[x.K]=(inn[x.K]||0)+x.v;ti+=x.v}else if(b&&!a){out[x.D]=(out[x.D]||0)+x.v;to+=x.v}else if(a&&b){tr+=x.v}});
+  var aw=0;before.forEach(function(x){if(KS[x.D])aw+=x.v;if(KS[x.K])aw-=x.v});
+  var sk={};Object.keys(KS).forEach(function(k){sk[k]=0});
+  upto.forEach(function(x){if(KS[x.D])sk[x.D]+=x.v;if(KS[x.K])sk[x.K]-=x.v});
+  function rows(o,s){return Object.keys(o).sort().map(function(k){return '<tr><td>'+esc(nm(k))+'</td><td>'+rp(s*o[k])+'</td></tr>'}).join('')||'<tr><td class="m">Tidak ada</td><td></td></tr>'}
+  $('kas').innerHTML='<h2>Arus kas '+m+'</h2><div class="m" style="margin-bottom:8px">Gabungan akun: '+esc(Object.keys(KS).sort().map(nm).join(', '))+'</div><table><tr><td>Saldo awal (kas, bank, e-money)</td><td>'+rp(aw)+'</td></tr><tr><td colspan="2" class="h">Kas masuk (per akun lawan)</td></tr>'+rows(inn,1)+
+    '<tr class="t"><td>Total masuk</td><td class="in">'+rp(ti)+'</td></tr><tr><td colspan="2" class="h">Kas keluar (per akun lawan)</td></tr>'+rows(out,-1)+
+    '<tr class="t"><td>Total keluar</td><td class="out">'+rp(-to)+'</td></tr>'+(tr?'<tr><td class="m">Perpindahan antar kas, bank, e-money (tidak mengubah total)</td><td class="m">'+rp(tr)+'</td></tr>':'')+
+    '<tr><td colspan="2" class="h"></td></tr><tr class="t"><td>Arus kas bersih</td><td>'+rp(ti-to)+'</td></tr><tr class="t"><td>Saldo akhir gabungan</td><td>'+rp(aw+ti-to)+'</td></tr>'+
+    '<tr><td colspan="2" class="h">Saldo akhir per akun</td></tr>'+rows(sk,1)+'</table>';
+  // laba rugi
+  function lr(rowsX){var rev={},cost={},r=0,c=0;rowsX.forEach(function(x){[[x.D,x.v],[x.K,-x.v]].forEach(function(p){var k=p[0],f=k[0];if(f==='4'){rev[k]=(rev[k]||0)-p[1];r-=p[1]}if(f==='5'){cost[k]=(cost[k]||0)+p[1];c+=p[1]}})});return{rev:rev,cost:cost,r:r,c:c}}
+  var L=lr(P);
+  $('lr').innerHTML='<h2>Laba rugi '+m+'</h2><table><tr><td colspan="2" class="h">Pendapatan</td></tr>'+rows(L.rev,1)+'<tr class="t"><td>Total pendapatan</td><td>'+rp(L.r)+'</td></tr><tr><td colspan="2" class="h">Biaya</td></tr>'+rows(L.cost,1)+
+    '<tr class="t"><td>Total biaya</td><td>'+rp(L.c)+'</td></tr><tr><td colspan="2" class="h"></td></tr><tr class="t"><td>Laba (rugi) bersih</td><td class="'+(L.r-L.c>=0?'in':'out')+'">'+rp(L.r-L.c)+'</td></tr></table>';
+  // neraca
+  var sal={};upto.forEach(function(x){sal[x.D]=(sal[x.D]||0)+x.v;sal[x.K]=(sal[x.K]||0)-x.v});
+  var A={},Li={},E={},ta=0,tl=0,te=0;
+  Object.keys(sal).sort().forEach(function(k){var f=k[0];if(f==='1'){A[k]=sal[k];ta+=sal[k]}if(f==='2'){Li[k]=-sal[k];tl-=sal[k]}if(f==='3'){E[k]=-sal[k];te-=sal[k]}});
+  var LU=lr(upto),lb=LU.r-LU.c;
+  $('nr').innerHTML='<h2>Neraca per akhir '+m+'</h2><table><tr><td colspan="2" class="h">Aset</td></tr>'+rows(A,1)+'<tr class="t"><td>Total aset</td><td>'+rp(ta)+'</td></tr>'+
+    '<tr><td colspan="2" class="h">Kewajiban</td></tr>'+rows(Li,1)+'<tr class="t"><td>Total kewajiban</td><td>'+rp(tl)+'</td></tr>'+
+    '<tr><td colspan="2" class="h">Ekuitas</td></tr>'+rows(E,1)+'<tr><td>Laba (rugi) berjalan</td><td>'+rp(lb)+'</td></tr><tr class="t"><td>Total ekuitas</td><td>'+rp(te+lb)+'</td></tr>'+
+    '<tr><td colspan="2" class="h"></td></tr><tr class="t"><td>Kewajiban + ekuitas</td><td>'+rp(tl+te+lb)+'</td></tr></table>'+
+    '<div class="m" style="margin-top:8px">'+(Math.round(ta)===Math.round(tl+te+lb)?'Neraca seimbang.':'Selisih '+rp(ta-(tl+te+lb))+': periksa jurnal yang belum lengkap.')+'</div>';
+}
+
+
+
+function isiBB(){
+  var b0=$('bbAkun').value||'*';
+  $('bbAkun').innerHTML='<option value="*">Semua akun</option>'+coa.map(function(a){return '<option value="'+esc(a.k)+'">'+esc(a.k+' '+a.n)+'</option>'}).join('');
+  $('bbAkun').value=b0;if($('bbAkun').value!==b0)$('bbAkun').value='*';
+}
+function renderBB(){
+  if(!loaded)return;
+  var m=$('bln').value,all=$('bbPer').value==='all',sel=$('bbAkun').value||'*',accts=[];
+  if(sel==='*'){var seen={};coa.forEach(function(a){seen[a.k]=1;accts.push(a.k)});jur.forEach(function(x){[x.D,x.K].forEach(function(k){if(!seen[k]){seen[k]=1;accts.push(k)}})})}
+  else accts=[sel];
+  accts.sort();
+  var srt=jur.slice().sort(function(a,b){return a.d<b.d?-1:a.d>b.d?1:a.row-b.row}),html='';
+  accts.forEach(function(k){
+    var dn=(k[0]==='1'||k[0]==='5'),awal=0,rows=[];
+    srt.forEach(function(x){
+      if(x.D!==k&&x.K!==k)return;
+      var dk=x.D===k?x.v:0,kr=x.K===k?x.v:0,net=dn?dk-kr:kr-dk,bl=x.d.slice(0,7);
+      if(!all&&bl<m){awal+=net;return}
+      if(!all&&bl>m)return;
+      rows.push({x:x,dk:dk,kr:kr,net:net});
+    });
+    if(sel==='*'&&!rows.length&&!awal)return;
+    var saldo=awal,td=0,tk=0,body='';
+    rows.forEach(function(r){
+      saldo+=r.net;td+=r.dk;tk+=r.kr;
+      var lawan=r.x.D===k?r.x.K:r.x.D;
+      body+='<tr><td>'+esc(r.x.d.slice(8)+'/'+r.x.d.slice(5,7)+'/'+r.x.d.slice(2,4))+' · '+esc(r.x.ket)+'<div class="m">lawan: '+esc(nm(lawan))+'</div></td><td class="r">'+(r.dk?rp(r.dk):'')+'</td><td class="r">'+(r.kr?rp(r.kr):'')+'</td><td class="r">'+rp(saldo)+'</td></tr>';
+    });
+    html+='<div class="card"><h2>'+esc(nm(k))+'</h2><div class="m" style="margin-bottom:6px">Saldo normal: '+(dn?'debit':'kredit')+'</div><div class="scroll"><table class="bb">'+
+      '<tr class="h2"><td>Tanggal · Keterangan</td><td class="r">Debit</td><td class="r">Kredit</td><td class="r">Saldo</td></tr>'+
+      (all?'':'<tr><td>Saldo awal</td><td></td><td></td><td class="r">'+rp(awal)+'</td></tr>')+
+      (body||'<tr><td class="m" colspan="4">Tidak ada transaksi pada periode ini.</td></tr>')+
+      '<tr class="t"><td>Total</td><td class="r">'+rp(td)+'</td><td class="r">'+rp(tk)+'</td><td class="r">'+rp(saldo)+'</td></tr></table></div></div>';
+  });
+  $('bb').innerHTML=html||'<div class="card"><div class="m">Tidak ada transaksi pada periode ini.</div></div>';
+}
+var _render=render;render=function(){_render();renderBB()};
+
+async function simpan(){
+  if(!loaded){st('Tunggu data selesai dimuat.');return}
+  var d=$('tgl').value,ket=$('ket').value.trim(),v=parseFloat($('nil').value),D=$('deb').value,K=$('kre').value;
+  if(!d||!ket||!(v>0)||!D||!K||D===K){st('Lengkapi tanggal, keterangan, nilai, dan pilih akun debit yang berbeda dari kredit.');return}
+  $('simpan').disabled=true;
+  try{
+    st('Menyimpan...');
+    var n=(await api('add',{tgl:d,ket:ket,nil:v,deb:D,kre:K})).row;
+    $('ket').value='';$('nil').value='';
+    await muat(false);st('Tersimpan di baris '+n+'.');
+  }catch(e){st(galat(e))}
+  finally{$('simpan').disabled=false}
+}
+
+(function(){var t=new Date();$('tgl').value=t.getFullYear()+'-'+('0'+(t.getMonth()+1)).slice(-2)+'-'+('0'+t.getDate()).slice(-2)})();
+isiAkun();
+$('muat').onclick=function(){muat(false)};$('masuk').onclick=masuk;$('keluar').onclick=keluar;$('simpan').onclick=simpan;$('bln').onchange=render;$('bbAkun').onchange=renderBB;$('bbPer').onchange=renderBB;
+document.querySelector('.tabs').onclick=function(e){var t=e.target.getAttribute('data-t');if(!t)return;
+  [].forEach.call(document.querySelectorAll('.tabs button'),function(b){b.className=b.getAttribute('data-t')===t?'on':''});
+  [].forEach.call(document.querySelectorAll('.sec'),function(s){s.className='sec'+(s.id==='s-'+t?' on':'')})};
+/* data dan daftar akun diperiksa ulang tiap 30 detik selama halaman terbuka */
+setInterval(function(){if(!document.hidden&&cred&&loaded)muat(true)},30000);
+document.addEventListener('visibilitychange',function(){if(!document.hidden&&cred&&loaded)muat(true)});
+if('serviceWorker' in navigator&&(location.protocol==='https:'||location.hostname==='localhost')){navigator.serviceWorker.register('sw.js').catch(function(){})}
+if(cred)bukaApp();else tampilLogin();
+</script>
+</body>
+</html>
