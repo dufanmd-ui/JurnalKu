@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <title>JurnalKu</title>
 <link rel="manifest" href="manifest.webmanifest">
+<script>try{var tt=localStorage.getItem('jk-tema');if(tt)document.documentElement.setAttribute('data-theme',tt)}catch(e){}</script>
 <link rel="icon" href="icon-192.png">
 <link rel="apple-touch-icon" href="icon-180.png">
 <meta name="theme-color" content="#2f6fed">
@@ -44,7 +45,10 @@ tr.t td{font-weight:700;border-bottom:0}
 
 .tabs{overflow-x:auto}
 .tabs button{flex:1 0 auto;width:auto;white-space:nowrap;padding:8px 12px}
-.ub{width:auto;margin:0 0 0 8px;padding:4px 10px;font-size:12px}
+.ik{width:36px;height:36px;padding:0;margin:0 0 0 4px;display:inline-flex;align-items:center;justify-content:center;border-radius:8px;color:var(--mut);flex:none}
+.ik:hover{color:var(--tx)}
+.ik.del:hover{color:var(--out)}
+:root[data-theme="light"]{color-scheme:light}
 .bb{font-size:13px}
 .bb td{padding:5px 6px}
 .bb td.r{text-align:right;white-space:nowrap}
@@ -60,6 +64,7 @@ button.out2{width:auto;margin:0;white-space:nowrap}
 <div style="display:flex;align-items:center;gap:10px;margin:4px 0 4px">
   <img id="logo" src="icon-192.png" width="48" height="48" alt="Logo JurnalKu" style="border-radius:12px;flex:none">
   <h1 style="margin:0">JurnalKu</h1>
+  <button type="button" id="tema" class="ik" style="margin-left:auto" title="Ganti tema" aria-label="Ganti tema terang atau gelap"></button>
 </div>
 <div id="st">Silakan masuk.</div>
 <div class="card" id="login" style="display:none">
@@ -198,7 +203,7 @@ function render(){
   var upto=jur.filter(function(x){return x.d.slice(0,7)<=m}),before=jur.filter(function(x){return x.d.slice(0,7)<m});
   // jurnal
   $('jl').innerHTML=P.length?'<table>'+P.slice().sort(function(a,b){return a.d<b.d?1:-1}).map(function(x){
-    return '<tr><td>'+esc(x.d.slice(8))+' · '+esc(x.ket)+(x.by?' · '+esc(x.by.split('@')[0]):'')+'<div class="m">D '+esc(nm(x.D))+' / K '+esc(nm(x.K))+'</div></td><td>'+rp(x.v)+'</td><td>'+(bisaUbah(x)?'<button type="button" class="ub" data-row="'+x.row+'">Ubah</button>':'')+'</td></tr>'}).join('')+'</table>':'<div class="m">Belum ada jurnal di periode ini.</div>';
+    return '<tr><td>'+esc(x.d.slice(8))+' · '+esc(x.ket)+(x.by?' · '+esc(x.by.split('@')[0]):'')+'<div class="m">D '+esc(nm(x.D))+' / K '+esc(nm(x.K))+'</div></td><td>'+rp(x.v)+'</td><td>'+(bisaUbah(x)?ikEdit(x.row)+ikDel(x.row):'')+'</td></tr>'}).join('')+'</table>':'<div class="m">Belum ada jurnal di periode ini.</div>';
   // arus kas gabungan: kas + bank + e-money
   var KS=kasSet(),inn={},out={},ti=0,to=0,tr=0;
   P.forEach(function(x){var a=KS[x.D],b=KS[x.K];if(a&&!b){inn[x.K]=(inn[x.K]||0)+x.v;ti+=x.v}else if(b&&!a){out[x.D]=(out[x.D]||0)+x.v;to+=x.v}else if(a&&b){tr+=x.v}});
@@ -268,6 +273,9 @@ function renderBB(){
 }
 var _render=render;render=function(){_render();renderBB()};
 
+var SVG='<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">';
+function ikEdit(r){return '<button type="button" class="ik" data-edit="'+r+'" title="Ubah" aria-label="Ubah">'+SVG+'<path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg></button>'}
+function ikDel(r){return '<button type="button" class="ik del" data-del="'+r+'" title="Hapus" aria-label="Hapus">'+SVG+'<path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/></svg></button>'}
 var editing=null;
 function bisaUbah(x){return !x.by||x.by.trim().toLowerCase()===(cred&&cred.email)}
 function resetForm(){editing=null;$('simpan').textContent='Simpan';$('batal').style.display='none';$('ket').value='';$('nil').value='';$('deb').value='';$('kre').value=''}
@@ -278,6 +286,16 @@ function mulaiUbah(row){
   $('simpan').textContent='Simpan perubahan';$('batal').style.display='block';
   st('Mengubah jurnal di baris '+row+'. Ubah isinya, lalu tekan Simpan perubahan.');
   $('s-jurnal').scrollIntoView({behavior:'smooth'});
+}
+async function hapusJurnal(row){
+  var x=jur.filter(function(z){return z.row===row})[0];if(!x)return;
+  if(!confirm('Hapus jurnal ini?\n'+x.d+' | '+x.ket+' | '+rp(x.v)+'\nDebit '+nm(x.D)+'\nKredit '+nm(x.K)))return;
+  try{
+    st('Menghapus...');
+    await api('hapus',{row:row,o_ket:x.ket,o_nil:x.v,o_deb:x.D,o_kre:x.K});
+    if(editing)resetForm();
+    await muat(false);st('Jurnal dihapus.');
+  }catch(e){st(galat(e))}
 }
 async function simpan(){
   if(!loaded){st('Tunggu data selesai dimuat.');return}
@@ -302,8 +320,16 @@ async function simpan(){
 (function(){var t=new Date();$('tgl').value=t.getFullYear()+'-'+('0'+(t.getMonth()+1)).slice(-2)+'-'+('0'+t.getDate()).slice(-2)})();
 isiAkun();
 $('muat').onclick=function(){muat(false)};$('masuk').onclick=masuk;$('keluar').onclick=keluar;$('simpan').onclick=simpan;$('bln').onchange=render;$('bbAkun').onchange=renderBB;$('bbPer').onchange=renderBB;
-$('jl').onclick=function(e){var r=e.target.getAttribute&&e.target.getAttribute('data-row');if(r)mulaiUbah(Number(r))};
+$('jl').onclick=function(e){var b=e.target.closest&&e.target.closest('button');if(!b)return;var ed=b.getAttribute('data-edit'),dl=b.getAttribute('data-del');if(ed)mulaiUbah(Number(ed));else if(dl)hapusJurnal(Number(dl))};
 $('batal').onclick=function(){resetForm();st('Perubahan dibatalkan.')};
+function temaAktif(){return document.documentElement.getAttribute('data-theme')||((window.matchMedia&&matchMedia('(prefers-color-scheme: dark)').matches)?'dark':'light')}
+function ikonTema(){
+  var gelap=temaAktif()==='dark';
+  $('tema').innerHTML=SVG+(gelap?'<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>':'<path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z"/>')+'</svg>';
+  $('tema').title=gelap?'Ganti ke mode terang':'Ganti ke mode gelap';
+}
+$('tema').onclick=function(){var n=temaAktif()==='dark'?'light':'dark';document.documentElement.setAttribute('data-theme',n);try{localStorage.setItem('jk-tema',n)}catch(e){}ikonTema()};
+ikonTema();
 document.querySelector('.tabs').onclick=function(e){var t=e.target.getAttribute('data-t');if(!t)return;
   [].forEach.call(document.querySelectorAll('.tabs button'),function(b){b.className=b.getAttribute('data-t')===t?'on':''});
   [].forEach.call(document.querySelectorAll('.sec'),function(s){s.className='sec'+(s.id==='s-'+t?' on':'')})};
