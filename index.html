@@ -44,6 +44,7 @@ tr.t td{font-weight:700;border-bottom:0}
 
 .tabs{overflow-x:auto}
 .tabs button{flex:1 0 auto;width:auto;white-space:nowrap;padding:8px 12px}
+.ub{width:auto;margin:0 0 0 8px;padding:4px 10px;font-size:12px}
 .bb{font-size:13px}
 .bb td{padding:5px 6px}
 .bb td.r{text-align:right;white-space:nowrap}
@@ -86,6 +87,7 @@ button.out2{width:auto;margin:0;white-space:nowrap}
     <label for="deb">Akun debit</label><select id="deb"></select>
     <label for="kre">Akun kredit</label><select id="kre"></select>
     <button type="button" class="p" id="simpan">Simpan</button>
+    <button type="button" id="batal" style="display:none;margin-top:8px">Batal ubah</button>
     <div id="st2" class="m" style="color:var(--tx);margin:6px 0"></div>
     <div class="m">Menulis ke tab CASHFLOW HARIAN pada kolom tanggal, keterangan, nominal, COA debit, dan COA kredit.</div>
   </div>
@@ -152,7 +154,7 @@ async function masuk(){
   catch(e){cred=null;st(galat(e))}
   finally{$('masuk').disabled=false}
 }
-function keluar(){cred=null;loaded=false;try{localStorage.removeItem('jk-cred')}catch(e){}tampilLogin();st('Kamu sudah keluar.')}
+function keluar(){cred=null;editing=null;loaded=false;try{localStorage.removeItem('jk-cred')}catch(e){}tampilLogin();st('Kamu sudah keluar.')}
 function parseCoa(c){return c.filter(function(r){return /^\d+$/.test(String(r[0]==null?'':r[0]).trim())}).map(function(r){return{k:String(r[0]).trim(),n:String(r[1]==null?'':r[1])}})}
 function isiAkun(){
   var o='<option value="">Pilih akun</option>'+coa.map(function(a){return '<option value="'+esc(a.k)+'">'+esc(a.k+' '+a.n)+'</option>'}).join('');
@@ -196,7 +198,7 @@ function render(){
   var upto=jur.filter(function(x){return x.d.slice(0,7)<=m}),before=jur.filter(function(x){return x.d.slice(0,7)<m});
   // jurnal
   $('jl').innerHTML=P.length?'<table>'+P.slice().sort(function(a,b){return a.d<b.d?1:-1}).map(function(x){
-    return '<tr><td>'+esc(x.d.slice(8))+' · '+esc(x.ket)+(x.by?' · '+esc(x.by.split('@')[0]):'')+'<div class="m">D '+esc(nm(x.D))+' / K '+esc(nm(x.K))+'</div></td><td>'+rp(x.v)+'</td></tr>'}).join('')+'</table>':'<div class="m">Belum ada jurnal di periode ini.</div>';
+    return '<tr><td>'+esc(x.d.slice(8))+' · '+esc(x.ket)+(x.by?' · '+esc(x.by.split('@')[0]):'')+'<div class="m">D '+esc(nm(x.D))+' / K '+esc(nm(x.K))+'</div></td><td>'+rp(x.v)+'</td><td>'+(bisaUbah(x)?'<button type="button" class="ub" data-row="'+x.row+'">Ubah</button>':'')+'</td></tr>'}).join('')+'</table>':'<div class="m">Belum ada jurnal di periode ini.</div>';
   // arus kas gabungan: kas + bank + e-money
   var KS=kasSet(),inn={},out={},ti=0,to=0,tr=0;
   P.forEach(function(x){var a=KS[x.D],b=KS[x.K];if(a&&!b){inn[x.K]=(inn[x.K]||0)+x.v;ti+=x.v}else if(b&&!a){out[x.D]=(out[x.D]||0)+x.v;to+=x.v}else if(a&&b){tr+=x.v}});
@@ -266,6 +268,17 @@ function renderBB(){
 }
 var _render=render;render=function(){_render();renderBB()};
 
+var editing=null;
+function bisaUbah(x){return !x.by||x.by.trim().toLowerCase()===(cred&&cred.email)}
+function resetForm(){editing=null;$('simpan').textContent='Simpan';$('batal').style.display='none';$('ket').value='';$('nil').value='';$('deb').value='';$('kre').value=''}
+function mulaiUbah(row){
+  var x=jur.filter(function(z){return z.row===row})[0];if(!x)return;
+  editing={row:row,o:{ket:x.ket,nil:x.v,deb:x.D,kre:x.K}};
+  $('tgl').value=x.d;$('ket').value=x.ket;$('nil').value=x.v;$('deb').value=x.D;$('kre').value=x.K;
+  $('simpan').textContent='Simpan perubahan';$('batal').style.display='block';
+  st('Mengubah jurnal di baris '+row+'. Ubah isinya, lalu tekan Simpan perubahan.');
+  $('s-jurnal').scrollIntoView({behavior:'smooth'});
+}
 async function simpan(){
   if(!loaded){st('Tunggu data selesai dimuat.');return}
   var d=$('tgl').value,ket=$('ket').value.trim(),v=parseFloat($('nil').value),D=$('deb').value,K=$('kre').value;
@@ -273,9 +286,15 @@ async function simpan(){
   $('simpan').disabled=true;
   try{
     st('Menyimpan...');
-    var n=(await api('add',{tgl:d,ket:ket,nil:v,deb:D,kre:K})).row;
-    $('ket').value='';$('nil').value='';
-    await muat(false);st('Tersimpan di baris '+n+'.');
+    if(editing){
+      var o=editing.o,n2=(await api('edit',{row:editing.row,tgl:d,ket:ket,nil:v,deb:D,kre:K,o_ket:o.ket,o_nil:o.nil,o_deb:o.deb,o_kre:o.kre})).row;
+      resetForm();
+      await muat(false);st('Perubahan tersimpan di baris '+n2+'.');
+    }else{
+      var n=(await api('add',{tgl:d,ket:ket,nil:v,deb:D,kre:K})).row;
+      $('ket').value='';$('nil').value='';
+      await muat(false);st('Tersimpan di baris '+n+'.');
+    }
   }catch(e){st(galat(e))}
   finally{$('simpan').disabled=false}
 }
@@ -283,6 +302,8 @@ async function simpan(){
 (function(){var t=new Date();$('tgl').value=t.getFullYear()+'-'+('0'+(t.getMonth()+1)).slice(-2)+'-'+('0'+t.getDate()).slice(-2)})();
 isiAkun();
 $('muat').onclick=function(){muat(false)};$('masuk').onclick=masuk;$('keluar').onclick=keluar;$('simpan').onclick=simpan;$('bln').onchange=render;$('bbAkun').onchange=renderBB;$('bbPer').onchange=renderBB;
+$('jl').onclick=function(e){var r=e.target.getAttribute&&e.target.getAttribute('data-row');if(r)mulaiUbah(Number(r))};
+$('batal').onclick=function(){resetForm();st('Perubahan dibatalkan.')};
 document.querySelector('.tabs').onclick=function(e){var t=e.target.getAttribute('data-t');if(!t)return;
   [].forEach.call(document.querySelectorAll('.tabs button'),function(b){b.className=b.getAttribute('data-t')===t?'on':''});
   [].forEach.call(document.querySelectorAll('.sec'),function(s){s.className='sec'+(s.id==='s-'+t?' on':'')})};
