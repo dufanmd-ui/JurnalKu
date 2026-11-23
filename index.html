@@ -42,6 +42,13 @@ tr.t td{font-weight:700;border-bottom:0}
 .in{color:var(--in)}.out{color:var(--out)}
 .sec{display:none}.sec.on{display:block}
 
+.tabs{overflow-x:auto}
+.tabs button{flex:1 0 auto;width:auto;white-space:nowrap;padding:8px 12px}
+.bb{font-size:13px}
+.bb td{padding:5px 6px}
+.bb td.r{text-align:right;white-space:nowrap}
+.bb tr.h2 td{color:var(--mut);font-size:12px;border-bottom:2px solid var(--bd)}
+.scroll{overflow-x:auto}
 #login{text-align:center}
 #login p{margin:0 0 12px}
 button.out2{width:auto;margin:0;white-space:nowrap}
@@ -67,6 +74,7 @@ button.out2{width:auto;margin:0;white-space:nowrap}
   <button type="button" data-t="kas">Arus kas</button>
   <button type="button" data-t="lr">Laba rugi</button>
   <button type="button" data-t="nr">Neraca</button>
+  <button type="button" data-t="bb">Buku besar</button>
 </div>
 
 <div class="sec on" id="s-jurnal">
@@ -86,6 +94,14 @@ button.out2{width:auto;margin:0;white-space:nowrap}
 <div class="sec" id="s-kas"><div class="card" id="kas"></div></div>
 <div class="sec" id="s-lr"><div class="card" id="lr"></div></div>
 <div class="sec" id="s-nr"><div class="card" id="nr"></div></div>
+<div class="sec" id="s-bb">
+  <div class="card">
+    <h2>Buku besar</h2>
+    <label for="bbAkun">Akun</label><select id="bbAkun"></select>
+    <label for="bbPer">Periode</label><select id="bbPer"><option value="bln">Bulan terpilih di atas</option><option value="all">Semua periode</option></select>
+  </div>
+  <div id="bb"></div>
+</div>
 </div>
 </main>
 
@@ -142,6 +158,7 @@ function isiAkun(){
   var o='<option value="">Pilih akun</option>'+coa.map(function(a){return '<option value="'+esc(a.k)+'">'+esc(a.k+' '+a.n)+'</option>'}).join('');
   var d0=$('deb').value,k0=$('kre').value;
   $('deb').innerHTML=o;$('kre').innerHTML=o;$('deb').value=d0;$('kre').value=k0;
+  isiBB();
 }
 async function muat(quiet){
   if(!quiet)st('Memuat data...');
@@ -211,6 +228,44 @@ function render(){
 
 
 
+function isiBB(){
+  var b0=$('bbAkun').value||'*';
+  $('bbAkun').innerHTML='<option value="*">Semua akun</option>'+coa.map(function(a){return '<option value="'+esc(a.k)+'">'+esc(a.k+' '+a.n)+'</option>'}).join('');
+  $('bbAkun').value=b0;if($('bbAkun').value!==b0)$('bbAkun').value='*';
+}
+function renderBB(){
+  if(!loaded)return;
+  var m=$('bln').value,all=$('bbPer').value==='all',sel=$('bbAkun').value||'*',accts=[];
+  if(sel==='*'){var seen={};coa.forEach(function(a){seen[a.k]=1;accts.push(a.k)});jur.forEach(function(x){[x.D,x.K].forEach(function(k){if(!seen[k]){seen[k]=1;accts.push(k)}})})}
+  else accts=[sel];
+  accts.sort();
+  var srt=jur.slice().sort(function(a,b){return a.d<b.d?-1:a.d>b.d?1:a.row-b.row}),html='';
+  accts.forEach(function(k){
+    var dn=(k[0]==='1'||k[0]==='5'),awal=0,rows=[];
+    srt.forEach(function(x){
+      if(x.D!==k&&x.K!==k)return;
+      var dk=x.D===k?x.v:0,kr=x.K===k?x.v:0,net=dn?dk-kr:kr-dk,bl=x.d.slice(0,7);
+      if(!all&&bl<m){awal+=net;return}
+      if(!all&&bl>m)return;
+      rows.push({x:x,dk:dk,kr:kr,net:net});
+    });
+    if(sel==='*'&&!rows.length&&!awal)return;
+    var saldo=awal,td=0,tk=0,body='';
+    rows.forEach(function(r){
+      saldo+=r.net;td+=r.dk;tk+=r.kr;
+      var lawan=r.x.D===k?r.x.K:r.x.D;
+      body+='<tr><td>'+esc(r.x.d.slice(8)+'/'+r.x.d.slice(5,7)+'/'+r.x.d.slice(2,4))+' · '+esc(r.x.ket)+'<div class="m">lawan: '+esc(nm(lawan))+'</div></td><td class="r">'+(r.dk?rp(r.dk):'')+'</td><td class="r">'+(r.kr?rp(r.kr):'')+'</td><td class="r">'+rp(saldo)+'</td></tr>';
+    });
+    html+='<div class="card"><h2>'+esc(nm(k))+'</h2><div class="m" style="margin-bottom:6px">Saldo normal: '+(dn?'debit':'kredit')+'</div><div class="scroll"><table class="bb">'+
+      '<tr class="h2"><td>Tanggal · Keterangan</td><td class="r">Debit</td><td class="r">Kredit</td><td class="r">Saldo</td></tr>'+
+      (all?'':'<tr><td>Saldo awal</td><td></td><td></td><td class="r">'+rp(awal)+'</td></tr>')+
+      (body||'<tr><td class="m" colspan="4">Tidak ada transaksi pada periode ini.</td></tr>')+
+      '<tr class="t"><td>Total</td><td class="r">'+rp(td)+'</td><td class="r">'+rp(tk)+'</td><td class="r">'+rp(saldo)+'</td></tr></table></div></div>';
+  });
+  $('bb').innerHTML=html||'<div class="card"><div class="m">Tidak ada transaksi pada periode ini.</div></div>';
+}
+var _render=render;render=function(){_render();renderBB()};
+
 async function simpan(){
   if(!loaded){st('Tunggu data selesai dimuat.');return}
   var d=$('tgl').value,ket=$('ket').value.trim(),v=parseFloat($('nil').value),D=$('deb').value,K=$('kre').value;
@@ -227,7 +282,7 @@ async function simpan(){
 
 (function(){var t=new Date();$('tgl').value=t.getFullYear()+'-'+('0'+(t.getMonth()+1)).slice(-2)+'-'+('0'+t.getDate()).slice(-2)})();
 isiAkun();
-$('muat').onclick=function(){muat(false)};$('masuk').onclick=masuk;$('keluar').onclick=keluar;$('simpan').onclick=simpan;$('bln').onchange=render;
+$('muat').onclick=function(){muat(false)};$('masuk').onclick=masuk;$('keluar').onclick=keluar;$('simpan').onclick=simpan;$('bln').onchange=render;$('bbAkun').onchange=renderBB;$('bbPer').onchange=renderBB;
 document.querySelector('.tabs').onclick=function(e){var t=e.target.getAttribute('data-t');if(!t)return;
   [].forEach.call(document.querySelectorAll('.tabs button'),function(b){b.className=b.getAttribute('data-t')===t?'on':''});
   [].forEach.call(document.querySelectorAll('.sec'),function(s){s.className='sec'+(s.id==='s-'+t?' on':'')})};
