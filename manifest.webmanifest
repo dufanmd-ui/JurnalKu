@@ -1,6 +1,6 @@
 {
-  "name": "JurnalKu",
-  "short_name": "JurnalKu",
+  "name": "Aplikasiku",
+  "short_name": "Aplikasiku",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",

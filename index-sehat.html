@@ -1,0 +1,397 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Hidup Sehat</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;600;800&display=swap">
+<style>
+:root{--bg:#eaf1f5;--surface:#fff;--ink:#14303f;--mute:#5a7282;--line:#cddce5;--meal:#c46d14;--move:#23704f;--sleep:#4650b0;color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0f1b23;--surface:#172833;--ink:#e6eef3;--mute:#93aab8;--line:#27404e;--meal:#f0a455;--move:#5cc597;--sleep:#9aa2f4;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#0f1b23;--surface:#172833;--ink:#e6eef3;--mute:#93aab8;--line:#27404e;--meal:#f0a455;--move:#5cc597;--sleep:#9aa2f4;color-scheme:dark}
+*{box-sizing:border-box}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Bricolage Grotesque",system-ui,-apple-system,"Segoe UI",sans-serif;font-size:16px;line-height:1.45}
+main{max-width:640px;margin:0 auto;padding:20px 16px 48px}
+h1{font-size:2rem;font-weight:800;letter-spacing:-.02em;margin:0 0 14px}
+h2{font-size:1.05rem;font-weight:600;margin:22px 0 8px}
+.tabs{display:grid;grid-template-columns:repeat(4,1fr);border-bottom:1px solid var(--line);margin-bottom:18px}
+.tabs button{background:none;border:0;border-bottom:3px solid transparent;color:var(--mute);font:inherit;font-weight:600;padding:10px 4px;cursor:pointer}
+.tabs button[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--ink)}
+button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid var(--sleep);outline-offset:2px}
+.date{color:var(--mute);margin:0}
+.big{font-size:2.6rem;font-weight:800;letter-spacing:-.03em;line-height:1.1;margin:2px 0 10px}
+.bar{height:8px;background:var(--line);border-radius:99px;overflow:hidden;margin-bottom:22px}
+.bar i{display:block;height:100%;background:var(--move)}
+ul{list-style:none;margin:0;padding:0}
+.tl{position:relative;padding-left:0}
+.tl::before{content:"";position:absolute;left:68px;top:6px;bottom:6px;width:2px;background:var(--line)}
+.tl li{position:relative;display:grid;grid-template-columns:52px 1fr;gap:0 28px;align-items:start;margin-bottom:10px}
+.tl li::before{content:"";position:absolute;left:62px;top:11px;width:14px;height:14px;border-radius:50%;background:var(--c,var(--ink));border:3px solid var(--bg)}
+.tl time{font-weight:600;padding-top:6px;color:var(--mute);font-variant-numeric:tabular-nums}
+.tl label{display:flex;gap:10px;align-items:flex-start;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:10px 12px;cursor:pointer}
+.tl input{margin-top:4px;width:18px;height:18px;accent-color:var(--c,var(--ink))}
+.tl b{display:block;font-weight:600}
+.tl small{color:var(--mute)}
+.meal{--c:var(--meal)}.move{--c:var(--move)}.sleep{--c:var(--sleep)}
+.done b{text-decoration:line-through;color:var(--mute)}
+.tl li.now{display:block;margin:2px 0 12px 0;color:var(--ink);font-size:.85rem;font-weight:600}
+.tl li.now::before{display:none}
+.tl li.now span{display:block;border-top:2px dashed var(--ink);padding-top:3px;margin-left:0}
+.list li{display:flex;justify-content:space-between;align-items:center;gap:10px;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:10px 12px;margin-bottom:8px}
+.list b{font-weight:600}.list small{display:block;color:var(--mute)}
+.del{background:none;border:1px solid var(--line);color:var(--mute);border-radius:8px;font:inherit;padding:4px 10px;cursor:pointer}
+.row{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+input,select{font:inherit;color:var(--ink);background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:9px 10px;min-width:0}
+input[type=text]{flex:1 1 140px}
+input[type=number]{width:90px}
+.btn{background:var(--ink);color:var(--bg);border:0;border-radius:8px;font:inherit;font-weight:600;padding:9px 16px;cursor:pointer}
+.err{color:#c0392b;min-height:1.2em;margin:6px 0 0;font-size:.9rem}
+.chips{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}
+.chips button{background:var(--surface);border:1px solid var(--line);color:var(--ink);border-radius:99px;font:inherit;padding:6px 14px;cursor:pointer}
+.chips button[aria-pressed="true"]{background:var(--move);border-color:var(--move);color:var(--bg);font-weight:600}
+.empty{color:var(--mute);margin:6px 0 10px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:14px}
+.lg{display:grid;grid-template-columns:44px 1fr 64px;gap:10px;align-items:center;margin-bottom:8px;font-size:.92rem}
+.track{height:12px;background:var(--line);border-radius:99px;overflow:hidden}
+.track i{display:block;height:100%;background:var(--sleep)}
+.lg span:last-child{text-align:right;font-variant-numeric:tabular-nums}
+.tabs{position:fixed;left:0;right:0;bottom:0;margin:0;background:var(--surface);border-top:1px solid var(--line);border-bottom:0;grid-template-columns:repeat(5,1fr);padding-bottom:env(safe-area-inset-bottom,0px);z-index:5}
+.tabs button{border-bottom:0;border-top:3px solid transparent;font-size:.8rem;padding:11px 2px}
+.tabs button[aria-selected="true"]{border-top-color:var(--ink)}
+main{padding-bottom:110px}
+.lg{grid-template-columns:40px 1fr 78px}
+.bar.s{height:6px;margin:6px 0 0}
+.mini{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin-bottom:18px}
+.mini>div{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:10px 12px}
+.mini span{display:block;color:var(--mute);font-size:.85rem}
+.mini b{display:block;font-weight:600;font-size:1.05rem}
+.fld{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.fld label{display:block;font-size:.85rem;color:var(--mute)}
+.fld input,.fld select{width:100%;margin-top:4px}
+.note{color:var(--mute);font-size:.85rem;margin:10px 0 0}
+.tabs{grid-template-columns:repeat(3,1fr)}
+.hd{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:14px}
+.hd h1{margin:0}
+.sm{background:none;border:1px solid var(--line);color:var(--ink);border-radius:8px;font:inherit;font-size:.85rem;padding:4px 10px;cursor:pointer}
+.rc{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:10px 12px}
+.tl .rc label{background:none;border:0;padding:0}
+.tl .row input{width:auto;height:auto;margin-top:0}
+.act{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;align-items:center}
+.tag{color:var(--move);font-size:.85rem;font-weight:600}
+details{margin-top:22px}
+summary{cursor:pointer;font-weight:600;padding:8px 0}
+.list li.ed{flex-direction:column;align-items:stretch;gap:8px}
+.mrow{display:grid;grid-template-columns:36px 1fr 80px;gap:6px;align-items:center}
+.mrow input,.mrow input[type=number]{width:100%}
+.ic{display:inline-flex;align-items:center;justify-content:center;width:32px;height:32px;padding:0;background:none;border:1px solid var(--line);color:var(--ink);border-radius:8px;cursor:pointer}
+.ic.rm{color:#d9534f}
+.rr{display:flex;gap:8px;align-items:flex-start;justify-content:space-between}
+.rr label{flex:1;min-width:0}
+.ib{display:flex;gap:6px;flex:none}
+.rr .ic,.ib .ic{width:30px;height:30px}
+</style>
+</head>
+<body>
+<main>
+<div style="margin-bottom:10px"><a class="sm" href="./" style="display:inline-block;text-decoration:none" aria-label="Kembali ke menu">← Menu</a></div>
+<div class="hd"><h1>Hidup Sehat</h1><button class="sm" data-refresh="1" aria-label="Muat ulang aplikasi">Muat ulang</button></div>
+<div class="tabs" id="tabs" role="tablist"></div>
+<div id="app"></div>
+</main>
+<script>
+var KEY='hidupsehat.v1';
+var DAYS=['Min','Sen','Sel','Rab','Kam','Jum','Sab'];
+var FULL=['Minggu','Senin','Selasa','Rabu','Kamis','Jumat','Sabtu'];
+var ORDER=[1,2,3,4,5,6,0];
+var DEF={meals:[{id:1,time:'08:00',name:'Sarapan',note:''},{id:2,time:'12:30',name:'Makan siang (ringan)',note:'Snack atau makanan ringan'},{id:3,time:'16:00',name:'Makan terakhir',note:''}],
+workouts:[0,1,2,3,4,5,6].map(function(d){return {id:5+d,day:d,time:'07:00',name:'Pemanasan & peregangan',min:15};}).concat([0,1,2,3,4,5,6].map(function(d,i){return {id:12+i,day:d,time:'20:00',name:'Gym / olahraga berat',min:30};})),
+sleep:{bed:'22:00',wake:'06:30'},log:[],done:{},next:30,v:4,ov:{},menu:{},profile:{sex:'p',age:'',h:'',w:'',goal:'jaga',act:1.4,tw:''},water:{},cal:{},weights:[]};
+function load(){try{var r=localStorage.getItem(KEY);if(r){var s=JSON.parse(r),o=Object.assign(JSON.parse(JSON.stringify(DEF)),s);var n=JSON.parse(JSON.stringify(DEF));if(!(s.v>=2)){o.meals=n.meals;o.sleep=n.sleep;}if(!(s.v>=3)){o.workouts=n.workouts;o.next=Math.max(s.next||0,n.next);o.v=3;}if(!(s.v>=4)){o.workouts.forEach(function(w){if(w.name==='Gym / olahraga berat'&&w.min===60)w.min=30;});o.v=4;}return o;}}catch(e){}return JSON.parse(JSON.stringify(DEF));}
+var S=load();
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){}}
+function $(s){return document.querySelector(s);}
+function pad(n){return String(n).padStart(2,'0');}
+function dk(d){return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());}
+function esc(s){return String(s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
+function dur(bed,wake){var a=bed.split(':').map(Number),b=wake.split(':').map(Number);var m=(b[0]*60+b[1])-(a[0]*60+a[1]);if(m<=0)m+=1440;return m;}
+function fmt(m){return Math.floor(m/60)+' j '+pad(m%60)+' m';}
+var tab='today',sub='meal',wday=new Date().getDay();
+function P(){return S.profile;}
+function bmr(){var p=P(),w=+p.w,h=+p.h,a=+p.age;if(!(w>0&&h>0&&a>0))return 0;return 10*w+6.25*h-5*a+(p.sex==='l'?5:-161);}
+function maint(){return Math.round(bmr()*(+P().act||1.4)/10)*10;}
+function calGoal(){var b=bmr();if(!b)return 0;var t=maint(),g=P().goal;t+=g==='turun'?-400:g==='naik'?300:0;return Math.max(t,P().sex==='l'?1500:1200);}
+function waterGoal(){var w=+P().w;return w>0?Math.round(w*35/50)*50:2000;}
+function calToday(k){return (S.cal[k]||[]).reduce(function(a,c){return a+c.kcal;},0);}
+function pctw(v,g){return g>0?Math.min(100,Math.round(v/g*100)):0;}
+
+function vToday(){
+  var now=new Date(),t=dk(now),dn=now.getDay(),done=S.done[t]||[];
+  var items=[].concat(
+    S.meals.map(function(m){return {k:'meal',id:'m'+m.id,time:m.time,title:m.name,sub:m.note};}),
+    S.workouts.filter(function(w){return w.day===dn;}).map(function(w){return {k:'move',id:'w'+w.id,time:w.time,title:w.name,sub:w.min+' menit'};}),
+    [{k:'sleep',id:'wake',time:S.sleep.wake,title:'Bangun',sub:''},{k:'sleep',id:'bed',time:S.sleep.bed,title:'Tidur',sub:'Target '+fmt(dur(S.sleep.bed,S.sleep.wake))}]
+  ).sort(function(a,b){return a.time.localeCompare(b.time);});
+  var nm=pad(now.getHours())+':'+pad(now.getMinutes()),marked=false,rows='';
+  var nowRow='<li class="now"><span>Sekarang, '+nm+'</span></li>';
+  items.forEach(function(i){
+    if(!marked&&i.time>nm){rows+=nowRow;marked=true;}
+    var d=done.indexOf(i.id)>-1;
+    rows+='<li class="'+i.k+(d?' done':'')+'"><time>'+i.time+'</time><label><input type="checkbox" data-done="'+i.id+'"'+(d?' checked':'')+'><span><b>'+esc(i.title)+'</b>'+(i.sub?'<small>'+esc(i.sub)+'</small>':'')+'</span></label></li>';
+  });
+  if(!marked)rows+=nowRow;
+  var n=items.filter(function(i){return done.indexOf(i.id)>-1;}).length,pct=Math.round(n/items.length*100);
+  return '<p class="date">'+FULL[dn]+', '+now.getDate()+' '+now.toLocaleDateString('id-ID',{month:'long'})+'</p>'+
+    '<p class="big">'+n+' dari '+items.length+' selesai</p><div class="bar"><i style="width:'+pct+'%"></i></div>'+mini(t)+'<ul class="tl">'+rows+'</ul>';
+}
+
+function vMeal(){
+  var list=S.meals.slice().sort(function(a,b){return a.time.localeCompare(b.time);}).map(function(m){
+    return ''+rowMeal(m)+'';
+  }).join('');
+  return '<h2>Jadwal makan harian</h2><ul class="list">'+(list||'<p class="empty">Belum ada jadwal makan. Tambahkan yang pertama di bawah.</p>')+'</ul>'+
+    '<div class="row"><input type="time" id="mt" value="08:00" aria-label="Jam makan"><input type="text" id="mn" placeholder="Nama, mis. Sarapan" aria-label="Nama waktu makan"><input type="text" id="mo" placeholder="Menu (opsional)" aria-label="Menu"></div>'+
+    '<div class="row"><button class="btn" data-add="meal">Tambah waktu makan</button></div><p class="err" id="err"></p>';
+}
+
+function vMove(){
+  var chips=ORDER.map(function(d){return '<button data-wday="'+d+'" aria-pressed="'+(wday===d)+'">'+DAYS[d]+'</button>';}).join('');
+  var list=S.workouts.filter(function(w){return w.day===wday;}).sort(function(a,b){return a.time.localeCompare(b.time);}).map(function(w){
+    return ''+rowMove(w)+'';
+  }).join('');
+  var total=S.workouts.reduce(function(a,w){return a+w.min;},0);
+  return '<h2>Rencana mingguan</h2><p class="date">Total '+total+' menit per minggu</p><div class="chips" style="margin-top:10px">'+chips+'</div>'+
+    '<ul class="list">'+(list||'<p class="empty">'+FULL[wday]+' masih hari istirahat.</p>')+'</ul>'+
+    '<div class="row"><input type="time" id="wt" value="06:00" aria-label="Jam olahraga"><input type="text" id="wn" placeholder="Jenis latihan" aria-label="Jenis latihan"><input type="number" id="wm" min="5" max="300" value="30" aria-label="Durasi menit"></div>'+
+    '<div class="row"><button class="btn" data-add="move">Tambah ke hari '+FULL[wday]+'</button></div><p class="err" id="err"></p>';
+}
+
+function vSleep(){
+  var logs=S.log.slice().sort(function(a,b){return b.date.localeCompare(a.date);}).slice(0,7).reverse();
+  var target=dur(S.sleep.bed,S.sleep.wake);
+  var bars=logs.map(function(l){var m=dur(l.bed,l.wake),d=new Date(l.date+'T00:00:00');
+    return '<div class="lg"><span>'+DAYS[d.getDay()]+'</span><div class="track"><i style="width:'+Math.min(100,Math.round(m/600*100))+'%"></i></div><span>'+fmt(m)+'</span></div>';}).join('');
+  return '<h2>Target tidur</h2><div class="card"><div class="row" style="margin-top:0"><label>Tidur <input type="time" data-sleep="bed" value="'+S.sleep.bed+'"></label><label>Bangun <input type="time" data-sleep="wake" value="'+S.sleep.wake+'"></label></div>'+
+    '<p class="date" style="margin-top:10px">Durasi target '+fmt(target)+'</p></div>'+
+    '<h2>Catat tidur semalam</h2><div class="row" style="margin-top:0"><label>Tidur <input type="time" id="lb" value="'+S.sleep.bed+'"></label><label>Bangun <input type="time" id="lw" value="'+S.sleep.wake+'"></label></div>'+
+    '<div class="row"><button class="btn" data-add="log">Simpan catatan</button></div>'+
+    '<h2>7 catatan terakhir</h2>'+(bars||'<p class="empty">Belum ada catatan. Simpan jam tidur semalam untuk mulai melihat pola.</p>');
+}
+
+function mini(t){var w=S.water[t]||0,wg=waterGoal(),c=calToday(t),cg=calGoal();
+  return '<div class="mini"><div><span>Air minum</span><b>'+w+' / '+wg+' ml</b><div class="bar s"><i style="width:'+pctw(w,wg)+'%;background:var(--sleep)"></i></div></div><div><span>Kalori</span><b>'+c+(cg?' / '+cg:'')+' kkal</b><div class="bar s"><i style="width:'+pctw(c,cg)+'%;background:var(--meal)"></i></div></div></div>';}
+
+function vJadwal(){
+  var c=[['meal','Makan'],['move','Olahraga'],['sleep','Tidur']].map(function(p){return '<button data-sub="'+p[0]+'" aria-pressed="'+(sub===p[0])+'">'+p[1]+'</button>';}).join('');
+  return '<div class="chips">'+c+'</div>'+{meal:vMeal,move:vMove,sleep:vSleep}[sub]();}
+
+function vCatat(){
+  var t=dk(new Date()),w=S.water[t]||0,wg=waterGoal(),cg=calGoal(),ct=calToday(t);
+  var list=(S.cal[t]||[]).map(function(c,i){return '<li><div><b>'+esc(c.name)+'</b><small>'+c.kcal+' kkal</small></div><button class="ic rm" data-del="cal:'+i+'" aria-label="Hapus '+esc(c.name)+'" title="Hapus">'+IC.trash+'</button></li>';}).join('');
+  return '<h2>Air minum</h2><div class="card"><p class="big" style="font-size:2rem">'+w+' ml</p><div class="bar s"><i style="width:'+pctw(w,wg)+'%;background:var(--sleep)"></i></div><p class="date" style="margin-top:8px">Target '+wg+' ml'+(P().w?'':', isi berat badan di Profil untuk target pribadi')+'</p>'+
+   '<div class="row"><button class="btn" data-water="250">+ Gelas 250</button><button class="btn" data-water="500">+ Botol 500</button><button class="del" data-water="-250">Kurangi 250</button></div></div>'+
+   '<h2>Kalori hari ini</h2><div class="card"><p class="big" style="font-size:2rem">'+ct+' kkal</p>'+(cg?'<div class="bar s"><i style="width:'+pctw(ct,cg)+'%;background:var(--meal)"></i></div><p class="date" style="margin-top:8px">Target sekitar '+cg+' kkal, sisa '+Math.max(0,cg-ct)+'</p>':'<p class="date">Isi Profil untuk melihat target kalori.</p>')+'</div>'+
+   '<ul class="list" style="margin-top:10px">'+(list||'<p class="empty">Belum ada makanan tercatat hari ini.</p>')+'</ul>'+
+   '<div class="row"><input type="text" id="cn" list="fl" autocomplete="off" placeholder="Ketik menu, mis. 2 telur rebus + nasi merah" aria-label="Nama makanan"><input type="number" id="ck" min="1" max="5000" placeholder="kkal" aria-label="Kalori"></div><p class="note" id="hint">Ketik menu, kkal terisi otomatis sebagai perkiraan. Bisa diubah manual.</p><datalist id="fl">'+FOODS.map(function(f){return '<option value="'+f[0]+'">';}).join('')+'</datalist><div class="row"><button class="btn" data-add="cal">Tambah makanan</button></div><p class="err" id="err"></p>';}
+
+function last7(){var a=[],i,d;for(i=6;i>=0;i--){d=new Date();d.setDate(d.getDate()-i);a.push(d);}return a;}
+function row(d,v,max,txt,color){return '<div class="lg"><span>'+DAYS[d.getDay()]+'</span><div class="track"><i style="width:'+(max>0?Math.min(100,Math.round(v/max*100)):0)+'%;background:'+color+'"></i></div><span>'+txt+'</span></div>';}
+function vStat(){
+  var days=last7(),wg=waterGoal(),cg=calGoal();
+  var tot=function(d){return S.meals.length+S.workouts.filter(function(w){return w.day===d.getDay();}).length+2;};
+  var sum=function(a){return a.reduce(function(x,y){return x+y;},0);};
+  var pc=days.map(function(d){return Math.min(1,(S.done[dk(d)]||[]).length/tot(d));});
+  var wv=days.map(function(d){return S.water[dk(d)]||0;});
+  var cv=days.map(function(d){return calToday(dk(d));}),cf=cv.filter(function(x){return x>0;});
+  var top='<div class="mini"><div><span>Jadwal selesai</span><b>'+Math.round(sum(pc)/7*100)+'%</b></div><div><span>Air rata-rata</span><b>'+Math.round(sum(wv)/7)+' ml</b></div><div><span>Kalori rata-rata</span><b>'+(cf.length?Math.round(sum(cf)/cf.length)+' kkal':'-')+'</b></div></div>';
+  var secs=function(t,fn){return '<h2>'+t+'</h2><div class="card">'+days.map(fn).join('')+'</div>';};
+  var wl=S.weights.slice(-5).reverse().map(function(x){return '<li><div><b>'+x.w+' kg</b><small>'+x.date+'</small></div></li>';}).join('');
+  return '<h2>7 hari terakhir</h2>'+top+
+   secs('Jadwal selesai',function(d,i){return row(d,pc[i],1,Math.round(pc[i]*100)+'%','var(--move)');})+
+   secs('Air minum',function(d,i){return row(d,wv[i],wg,wv[i]+' ml','var(--sleep)');})+
+   secs('Kalori',function(d,i){return row(d,cv[i],cg||Math.max(cv[i],1),cv[i]?cv[i]+' kkal':'-','var(--meal)');})+
+   secs('Tidur',function(d){var l=S.log.filter(function(x){return x.date===dk(d);})[0],m=l?dur(l.bed,l.wake):0;return row(d,m,600,m?fmt(m):'-','var(--sleep)');})+
+   (wl?'<h2>Riwayat berat badan</h2><ul class="list">'+wl+'</ul>':'');}
+
+function vProfil(){
+  var p=P(),lw=S.weights.length?S.weights[S.weights.length-1].w:'';
+  var sel=function(id,opts,v){return '<select id="'+id+'">'+opts.map(function(o){return '<option value="'+o[0]+'"'+(String(o[0])===String(v)?' selected':'')+'>'+o[1]+'</option>';}).join('')+'</select>';};
+  var est=bmr()?'<h2>Estimasi harianmu</h2><div class="card"><p style="margin:0">Kebutuhan kalori sekitar <b>'+maint()+' kkal</b>. Target kalori <b>'+calGoal()+' kkal</b>, target air <b>'+waterGoal()+' ml</b>.</p><p class="note">Ini perkiraan umum dari rumus standar, bukan saran medis. Untuk target penurunan berat yang besar atau kondisi kesehatan tertentu, konsultasikan ke dokter atau ahli gizi.</p></div>':'<p class="empty">Lengkapi usia, tinggi, dan berat badan untuk melihat target kalori dan air.</p>';
+  var gap=(p.tw&&lw)?'<p class="date" style="margin-top:8px">Berat terakhir '+lw+' kg, target '+p.tw+' kg, selisih '+Math.abs(lw-p.tw).toFixed(1)+' kg.</p>':'';
+  return '<h2>Data diri</h2><div class="card"><div class="fld"><label>Jenis kelamin'+sel('ps',[['p','Perempuan'],['l','Laki-laki']],p.sex)+'</label><label>Usia<input type="number" id="pa" min="10" max="100" value="'+p.age+'"></label><label>Tinggi (cm)<input type="number" id="ph" min="100" max="230" value="'+p.h+'"></label><label>Berat (kg)<input type="number" id="pw" min="30" max="250" step="0.1" value="'+p.w+'"></label><label>Aktivitas'+sel('pc',[[1.2,'Jarang bergerak'],[1.4,'Ringan, 1-3x/minggu'],[1.6,'Sedang, 3-5x/minggu'],[1.8,'Sering, 6-7x/minggu']],p.act)+'</label><label>Tujuan'+sel('pg',[['turun','Menurunkan berat'],['jaga','Menjaga berat'],['naik','Menaikkan berat']],p.goal)+'</label><label>Target berat (kg)<input type="number" id="pt" min="30" max="250" step="0.1" value="'+p.tw+'"></label></div><div class="row"><button class="btn" data-add="profile">Simpan profil</button></div></div>'+est+
+   '<h2>Catat berat hari ini</h2><div class="row" style="margin-top:0"><input type="number" id="lwt" min="30" max="250" step="0.1" value="'+lw+'" aria-label="Berat badan hari ini"><button class="btn" data-add="weight">Simpan berat</button></div>'+gap+'<p class="err" id="err"></p>';}
+
+function ico(p){return '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+p+'</svg>';}
+var IC={menu:ico('<path d="M8 6h13M8 12h13M8 18h13"/><path d="M3 6h.01M3 12h.01M3 18h.01"/>'),edit:ico('<path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/>'),trash:ico('<path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/>')};
+var editing=null,openDef=false,defEdit=null,menuEd=null;
+var MENU={
+1:[['Oatmeal susu + pisang + 1 sdm kacang cincang',400],['Telur orak-arik 2 butir + 2 roti gandum + tomat',400],['Yoghurt plain + pepaya + granola + 1 telur rebus',400],['Bubur ayam tanpa gorengan + 1 telur rebus',420],['Smoothie pisang, susu, selai kacang + 1 telur rebus',430],['2 roti gandum + 1/2 alpukat + 2 telur rebus',470],['Nasi merah 1/2 centong + telur dadar sayur + tempe panggang',450]],
+2:[['Apel + 2 sdm selai kacang',220],['Yoghurt plain + 10 butir almond',230],['Pisang + segenggam kacang tanah rebus',230],['Edamame rebus 1 mangkuk + 1 jeruk',220],['Pepaya 1 piring + 10 butir almond',220],['2 telur rebus + mentimun + 1 pisang',260],['Jeruk + segenggam kacang mete',240]],
+3:[['Nasi merah 1 centong + ikan bakar + tumis kangkung',620],['Nasi merah 1 centong + ayam panggang tanpa kulit + capcay',650],['Pepes ikan + nasi merah 1 centong + lalapan + tempe',640],['Nasi merah 1 centong + tahu-tempe bacem panggang + sayur asem + telur rebus',650],['Soto ayam bening + nasi 1 centong + telur rebus',600],['Ikan tongkol bumbu kuning + tumis buncis + nasi merah 1 centong',640],['Gado-gado: sayur, telur, tempe, 1 potong lontong, bumbu kacang secukupnya',650]]};
+var FOODS=[['nasi putih',200,'1 centong'],['nasi merah',170,'1 centong'],['nasi goreng',350,'1 piring'],['nasi uduk',300,'1 porsi'],['lontong',120,'1 potong'],['bubur ayam',350,'1 mangkuk'],['mie goreng',400,'1 piring'],['mie ayam',450,'1 mangkuk'],['bakso',350,'1 mangkuk'],['soto ayam',250,'1 mangkuk'],['gado-gado',350,'1 porsi'],['pecel',300,'1 porsi'],['sate ayam',33,'1 tusuk'],['rendang',200,'1 potong'],['ayam goreng',260,'1 potong'],['ayam panggang',200,'1 potong'],['ikan bakar',180,'1 potong'],['ikan goreng',200,'1 potong'],['pepes ikan',150,'1 porsi'],['tempe goreng',80,'1 potong'],['tempe',70,'1 potong'],['tahu',40,'1 potong'],['telur rebus',75,'1 butir'],['telur dadar',110,'1 butir'],['telur orak-arik',100,'1 butir'],['telur',80,'1 butir'],['roti gandum',70,'1 lembar'],['roti tawar',75,'1 lembar'],['oatmeal',150,'1 mangkuk'],['granola',120,'3 sdm'],['yoghurt',100,'1 cup'],['susu',150,'1 gelas'],['smoothie',200,'1 gelas'],['pisang goreng',120,'1 buah'],['pisang',100,'1 buah'],['apel',95,'1 buah'],['jeruk',60,'1 buah'],['pepaya',100,'1 piring'],['alpukat',120,'1/2 buah'],['almond',7,'1 butir'],['kacang tanah',160,'1 genggam'],['kacang mete',160,'1 genggam'],['selai kacang',95,'1 sdm'],['edamame',190,'1 mangkuk'],['mentimun',15,'1 buah'],['tomat',20,'1 buah'],['tumis kangkung',80,'1 porsi'],['tumis buncis',80,'1 porsi'],['capcay',120,'1 porsi'],['sayur asem',70,'1 mangkuk'],['whey',120,'1 scoop'],['kopi susu',120,'1 gelas'],['teh manis',100,'1 gelas'],['kopi',5,'1 cangkir'],['donat',250,'1 buah'],['biskuit',50,'1 keping']];
+function est(s){
+  var tot=0,ok=[],bad=[];
+  String(s).toLowerCase().split(/\s*(?:\+|,|;|\bdan\b|\bdengan\b)\s*/).forEach(function(p){
+    p=p.trim();if(!p)return;
+    var q=1,best=null,m=p.match(/^(\d+(?:[.,]\d+)?)\s*(?:x|buah|butir|potong|porsi|gelas|mangkuk|piring|centong|lembar|sdm|tusuk)?\s+(.+)$/);
+    if(m){q=parseFloat(m[1].replace(',','.'));p=m[2];}
+    FOODS.forEach(function(f){if(p.indexOf(f[0])>-1&&(!best||f[0].length>best[0].length))best=f;});
+    if(best){tot+=q*best[1];ok.push((q!==1?q+' x ':'')+best[0]+' '+Math.round(q*best[1]));}else bad.push(p);
+  });
+  var txt='Ketik menu, kkal terisi otomatis sebagai perkiraan. Bisa diubah manual.';
+  if(ok.length)txt='Perkiraan: '+ok.join(' + ')+' = '+Math.round(tot)+' kkal.'+(bad.length?' Belum dikenali: '+bad.join(', ')+', isi kkal sendiri.':'');
+  else if(bad.length)txt='Menu belum dikenali. Isi kkal sendiri.';
+  return {k:Math.round(tot),txt:txt};
+}
+function ovr(t){return S.ov[t]||(S.ov[t]={x:{},hide:[],add:[]});}
+function dayItems(t,dn){
+  var o=S.ov[t]||{},x=o.x||{},hide=o.hide||[];
+  var base=[].concat(
+    S.meals.map(function(m){var me=menuOf(m.id,dn);return {k:'meal',id:'m'+m.id,time:m.time,title:m.name,sub:me?me[0]:m.note,kk:me?me[1]:0};}),
+    S.workouts.filter(function(w){return w.day===dn;}).map(function(w){return {k:'move',id:'w'+w.id,time:w.time,title:w.name,sub:w.min+' menit',kk:0};}),
+    [{k:'sleep',id:'wake',time:S.sleep.wake,title:'Bangun',sub:'',kk:0},{k:'sleep',id:'bed',time:S.sleep.bed,title:'Tidur',sub:'Target '+fmt(dur(S.sleep.bed,S.sleep.wake)),kk:0}],
+    (o.add||[]).map(function(a){return {k:'other',id:'a'+a.id,time:a.time,title:a.title,sub:a.sub||'',kk:0};})
+  );
+  return base.filter(function(i){return hide.indexOf(i.id)<0;}).map(function(i){var e=x[i.id];if(e){i.time=e.time;i.title=e.title;i.sub=e.sub;}return i;}).sort(function(a,b){return a.time.localeCompare(b.time);});
+}
+function menuOf(id,d){var o=S.menu&&S.menu[id+':'+d];return o||(MENU[id]?MENU[id][d]:null);}
+function rowMeal(m){
+  if(menuEd===m.id){
+    var rs=ORDER.map(function(d){var me=menuOf(m.id,d)||['',0];return '<div class="mrow"><span>'+DAYS[d]+'</span><input type="text" id="mt'+d+'" value="'+esc(me[0])+'" aria-label="Menu '+FULL[d]+'"><input type="number" id="mk'+d+'" value="'+me[1]+'" min="0" max="3000" aria-label="kkal '+FULL[d]+'"></div>';}).join('');
+    return '<li class="ed"><b>Menu '+esc(m.name)+' per hari (nama menu dan kkal)</b>'+rs+'<div class="act"><button class="sm" data-msave="'+m.id+'">Simpan menu</button><button class="sm" data-dcancel="1">Batal</button></div></li>';
+  }
+  if(defEdit==='meal:'+m.id){
+    return '<li class="ed"><div class="row" style="margin:0"><input type="time" id="dt" value="'+m.time+'" aria-label="Jam"><input type="text" id="dn" value="'+esc(m.name)+'" aria-label="Nama"><input type="text" id="do" value="'+esc(m.note)+'" placeholder="Catatan (opsional)" aria-label="Catatan"></div><div class="act"><button class="sm" data-dsave="meal:'+m.id+'">Simpan</button><button class="sm" data-dcancel="1">Batal</button></div></li>';
+  }
+  return '<li><div><b>'+m.time+'  '+esc(m.name)+'</b>'+(m.note?'<small>'+esc(m.note)+'</small>':'')+'</div><div class="ib"><button class="ic" data-dedit="meal:'+m.id+'" aria-label="Ubah '+esc(m.name)+'" title="Ubah">'+IC.edit+'</button><button class="ic" data-menued="'+m.id+'" aria-label="Menu per hari '+esc(m.name)+'" title="Menu per hari">'+IC.menu+'</button><button class="ic rm" data-del="meal:'+m.id+'" aria-label="Hapus '+esc(m.name)+'" title="Hapus">'+IC.trash+'</button></div></li>';
+}
+function rowMove(w){
+  if(defEdit==='move:'+w.id){
+    return '<li class="ed"><div class="row" style="margin:0"><select id="dd" aria-label="Hari">'+ORDER.map(function(d){return '<option value="'+d+'"'+(d===w.day?' selected':'')+'>'+FULL[d]+'</option>';}).join('')+'</select><input type="time" id="dt" value="'+w.time+'" aria-label="Jam"><input type="text" id="dn" value="'+esc(w.name)+'" aria-label="Nama latihan"><input type="number" id="dm" min="5" max="300" value="'+w.min+'" aria-label="Durasi menit"></div><div class="act"><button class="sm" data-dsave="move:'+w.id+'">Simpan</button><button class="sm" data-dcancel="1">Batal</button></div></li>';
+  }
+  return '<li><div><b>'+w.time+'  '+esc(w.name)+'</b><small>'+w.min+' menit</small></div><div class="ib"><button class="ic" data-dedit="move:'+w.id+'" aria-label="Ubah '+esc(w.name)+'" title="Ubah">'+IC.edit+'</button><button class="ic rm" data-del="move:'+w.id+'" aria-label="Hapus '+esc(w.name)+'" title="Hapus">'+IC.trash+'</button></div></li>';
+}
+function failT(m){var e=$('#errt');if(e)e.textContent=m;}
+function act(d){
+  var t=dk(new Date()),o;
+  if(d.refresh){location.reload();return true;}
+  if(d.edit){editing=d.edit;render();return true;}
+  if(d.cancel){editing=null;render();return true;}
+  if(d.save){
+    var tm=$('#et').value,ti=$('#en').value.trim(),su=$('#es').value.trim();
+    if(!tm||!ti){failT('Isi jam dan nama kegiatan dulu.');return true;}
+    o=ovr(t);
+    if(d.save.charAt(0)==='a'){o.add.forEach(function(a){if('a'+a.id===d.save){a.time=tm;a.title=ti;a.sub=su;}});}
+    else{o.x[d.save]={time:tm,title:ti,sub:su};}
+    editing=null;save();render();return true;
+  }
+  if(d.hide){
+    o=ovr(t);
+    if(d.hide.charAt(0)==='a'){o.add=o.add.filter(function(a){return 'a'+a.id!==d.hide;});}
+    else if(o.hide.indexOf(d.hide)<0){o.hide.push(d.hide);}
+    editing=null;save();render();return true;
+  }
+  if(d.reset){delete S.ov[t];editing=null;save();render();return true;}
+  if(d.dedit){defEdit=d.dedit;menuEd=null;render();return true;}
+  if(d.menued){menuEd=+d.menued;defEdit=null;render();return true;}
+  if(d.dcancel){defEdit=null;menuEd=null;render();return true;}
+  if(d.dsave){
+    var pp=d.dsave.split(':'),kd=pp[0],did=+pp[1],tm2=$('#dt').value,nn=$('#dn').value.trim();
+    if(!tm2||!nn){fail('Isi jam dan nama dulu.');return true;}
+    if(kd==='meal'){S.meals.forEach(function(m){if(m.id===did){m.time=tm2;m.name=nn;m.note=$('#do').value.trim();}});}
+    else{var mi=parseInt($('#dm').value,10);if(!(mi>0)){fail('Isi durasi dulu.');return true;}S.workouts.forEach(function(w){if(w.id===did){w.time=tm2;w.name=nn;w.min=mi;w.day=+$('#dd').value;wday=w.day;}});}
+    defEdit=null;save();render();return true;
+  }
+  if(d.msave){
+    var mid=+d.msave;if(!S.menu)S.menu={};
+    ORDER.forEach(function(dd){var nme=$('#mt'+dd).value.trim(),kk=parseInt($('#mk'+dd).value,10)||0;if(nme)S.menu[mid+':'+dd]=[nme,kk];else delete S.menu[mid+':'+dd];});
+    menuEd=null;save();render();return true;
+  }
+  if(d.add==='today'){
+    var at=$('#at').value,an=$('#an').value.trim();
+    if(!at||!an){failT('Isi jam dan nama kegiatan dulu.');return true;}
+    o=ovr(t);o.add.push({id:S.next++,time:at,title:an,sub:''});save();render();return true;
+  }
+  if(d.logmenu){
+    var it=dayItems(t,new Date().getDay()).filter(function(i){return i.id===d.logmenu;})[0];
+    if(it&&it.kk){(S.cal[t]=S.cal[t]||[]).push({name:it.title+': '+it.sub,kcal:it.kk,src:it.id});save();render();}
+    return true;
+  }
+  return false;
+}
+function vHari(){
+  var now=new Date(),t=dk(now),dn=now.getDay(),done=S.done[t]||[],items=dayItems(t,dn);
+  var nm=pad(now.getHours())+':'+pad(now.getMinutes()),marked=false,rows='';
+  var nowRow='<li class="now"><span>Sekarang, '+nm+'</span></li>';
+  var logged=(S.cal[t]||[]).map(function(c){return c.src;});
+  items.forEach(function(i){
+    if(!marked&&i.time>nm){rows+=nowRow;marked=true;}
+    var d=done.indexOf(i.id)>-1,body;
+    if(editing===i.id){
+      body='<div class="row" style="margin-top:0"><input type="time" id="et" value="'+i.time+'" aria-label="Jam"><input type="text" id="en" value="'+esc(i.title)+'" aria-label="Nama kegiatan"><input type="text" id="es" value="'+esc(i.sub)+'" placeholder="Catatan atau menu" aria-label="Catatan"></div><div class="act"><button class="sm" data-save="'+i.id+'">Simpan</button><button class="ic rm" data-hide="'+i.id+'" aria-label="Hapus hari ini" title="Hapus hari ini">'+IC.trash+'</button><button class="sm" data-cancel="1">Batal</button></div>';
+    }else{
+      body='<div class="rr"><label><input type="checkbox" data-done="'+i.id+'"'+(d?' checked':'')+'><span><b>'+esc(i.title)+'</b>'+(i.sub?'<small>'+esc(i.sub)+(i.kk?' (±'+i.kk+' kkal)':'')+'</small>':'')+'</span></label><div class="ib"><button class="ic" data-edit="'+i.id+'" aria-label="Ubah '+esc(i.title)+'" title="Ubah">'+IC.edit+'</button><button class="ic rm" data-hide="'+i.id+'" aria-label="Hapus '+esc(i.title)+' hari ini" title="Hapus hari ini">'+IC.trash+'</button></div></div>'+(i.kk?'<div class="act">'+(logged.indexOf(i.id)>-1?'<span class="tag">Sudah dicatat di kalori</span>':'<button class="sm" data-logmenu="'+i.id+'">Catat kkal</button>')+'</div>':'');
+    }
+    rows+='<li class="'+i.k+(d?' done':'')+'"><time>'+i.time+'</time><div class="rc">'+body+'</div></li>';
+  });
+  if(!marked)rows+=nowRow;
+  var n=items.filter(function(i){return done.indexOf(i.id)>-1;}).length,pct=items.length?Math.round(n/items.length*100):0;
+  var ov=S.ov[t],changed=ov&&((ov.add||[]).length||(ov.hide||[]).length||Object.keys(ov.x||{}).length);
+  return '<p class="date">'+FULL[dn]+', '+now.getDate()+' '+now.toLocaleDateString('id-ID',{month:'long'})+'</p><p class="big">'+n+' dari '+items.length+' selesai</p><div class="bar"><i style="width:'+pct+'%"></i></div>'+mini(t)+'<ul class="tl">'+rows+'</ul>'+
+    '<h2>Tambah kegiatan hari ini</h2><div class="row" style="margin-top:0"><input type="time" id="at" value="12:00" aria-label="Jam"><input type="text" id="an" placeholder="Nama kegiatan" aria-label="Nama kegiatan"><button class="btn" data-add="today">Tambah</button></div><p class="err" id="errt"></p>'+
+    (changed?'<div class="row"><button class="sm" data-reset="1">Kembalikan jadwal hari ini ke default</button></div>':'')+
+    '<details id="defd"'+(openDef?' open':'')+'><summary>Atur jadwal default</summary><p class="note">Perubahan di sini berlaku untuk hari-hari berikutnya. Untuk mengubah hari ini saja, pakai tombol Ubah di atas.</p>'+vJadwal()+'</details>';
+}
+document.addEventListener('input',function(e){
+  var t=e.target;
+  if(t.id==='cn'){var r=est(t.value),h=$('#hint'),ck=$('#ck');if(h)h.textContent=r.txt;if(ck&&!ck.dataset.man)ck.value=r.k||'';}
+  if(t.id==='ck'){t.dataset.man=t.value?'1':'';}
+});
+document.addEventListener('toggle',function(e){if(e.target.id==='defd')openDef=e.target.open;},true);
+
+function render(){
+  $('#tabs').innerHTML=[['today','Hari ini'],['catat','Catat'],['profil','Profil']].map(function(p){return '<button role="tab" aria-selected="'+(tab===p[0])+'" data-tab="'+p[0]+'">'+p[1]+'</button>';}).join('');
+  $('#app').innerHTML={today:vHari,catat:vCatat,profil:vProfil}[tab]();
+}
+function fail(msg){var e=$('#err');if(e)e.textContent=msg;}
+
+document.addEventListener('click',function(e){
+  var b=e.target.closest('button');if(!b)return;
+  var d=b.dataset;
+  if(d.tab){tab=d.tab;render();return;}
+  if(act(d))return;
+  if(d.sub){sub=d.sub;render();return;}
+  if(d.water){var wk0=dk(new Date());S.water[wk0]=Math.max(0,(S.water[wk0]||0)+parseInt(d.water,10));save();render();return;}
+  if(d.wday!==undefined){wday=+d.wday;render();return;}
+  if(d.del){var p=d.del.split(':'),k=p[0],id=+p[1];
+    if(k==='meal')S.meals=S.meals.filter(function(x){return x.id!==id;});
+    if(k==='move')S.workouts=S.workouts.filter(function(x){return x.id!==id;});
+    if(k==='cal'){var ck0=dk(new Date());S.cal[ck0]=(S.cal[ck0]||[]).filter(function(x,j){return j!==id;});}
+    save();render();return;}
+  if(d.add==='meal'){
+    var t=$('#mt').value,n=$('#mn').value.trim();
+    if(!t||!n){fail('Isi jam dan nama waktu makan dulu.');return;}
+    S.meals.push({id:S.next++,time:t,name:n,note:$('#mo').value.trim()});save();render();return;}
+  if(d.add==='move'){
+    var wt=$('#wt').value,wn=$('#wn').value.trim(),wm=parseInt($('#wm').value,10);
+    if(!wt||!wn||!(wm>0)){fail('Isi jam, jenis latihan, dan durasi dulu.');return;}
+    S.workouts.push({id:S.next++,day:wday,time:wt,name:wn,min:wm});save();render();return;}
+  if(d.add==='cal'){var cn=$('#cn').value.trim(),ck=parseInt($('#ck').value,10);if(!cn||!(ck>0)){fail('Isi nama makanan dan kalorinya dulu.');return;}var tk=dk(new Date());(S.cal[tk]=S.cal[tk]||[]).push({name:cn,kcal:ck});save();render();return;}
+  if(d.add==='profile'){var pr=S.profile;pr.sex=$('#ps').value;pr.age=$('#pa').value;pr.h=$('#ph').value;pr.w=$('#pw').value;pr.act=+$('#pc').value;pr.goal=$('#pg').value;pr.tw=$('#pt').value;save();render();return;}
+  if(d.add==='weight'){var wn2=parseFloat($('#lwt').value);if(!(wn2>0)){fail('Isi berat badan dulu.');return;}var wd=dk(new Date());S.weights=S.weights.filter(function(x){return x.date!==wd;});S.weights.push({date:wd,w:wn2});S.profile.w=String(wn2);save();render();return;}
+  if(d.add==='log'){
+    var bed=$('#lb').value,wk=$('#lw').value;if(!bed||!wk)return;
+    var y=new Date();var date=dk(y);
+    S.log=S.log.filter(function(l){return l.date!==date;});S.log.push({date:date,bed:bed,wake:wk});save();render();return;}
+});
+document.addEventListener('change',function(e){
+  var t=e.target;
+  if(t.dataset.done){var k=dk(new Date());var arr=S.done[k]||[];
+    arr=t.checked?arr.concat(t.dataset.done):arr.filter(function(x){return x!==t.dataset.done;});
+    S.done[k]=arr;save();render();return;}
+  if(t.dataset.sleep&&t.value){S.sleep[t.dataset.sleep]=t.value;save();render();}
+});
+render();
+</script>
+</body>
+</html>
