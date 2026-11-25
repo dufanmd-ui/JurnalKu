@@ -70,7 +70,15 @@ main{padding-bottom:110px}
 .fld label{display:block;font-size:.85rem;color:var(--mute)}
 .fld input,.fld select{width:100%;margin-top:4px}
 .note{color:var(--mute);font-size:.85rem;margin:10px 0 0}
-.tabs{grid-template-columns:repeat(3,1fr)}
+.tabs{grid-template-columns:repeat(2,1fr)}
+.fl{display:flex;justify-content:space-between;align-items:center;gap:10px;background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:6px 10px;margin:6px 0}
+.fl small{display:block;color:var(--mute)}
+.fd{margin-top:10px}
+.fd summary{font-size:.9rem;padding:4px 0}
+.st{display:flex;gap:10px;align-items:flex-start;padding:7px 0;border-top:1px solid var(--line)}
+.st .n{flex:none;width:22px;height:22px;border-radius:50%;background:var(--line);display:flex;align-items:center;justify-content:center;font-size:.75rem;font-weight:600}
+.st small{display:block;color:var(--mute)}
+.tl .ff .row input.fk{width:90px}
 .hd{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:14px}
 .hd h1{margin:0}
 .sm{background:none;border:1px solid var(--line);color:var(--ink);border-radius:8px;font:inherit;font-size:.85rem;padding:4px 10px;cursor:pointer}
@@ -219,7 +227,7 @@ function vProfil(){
   var est=bmr()?'<h2>Estimasi harianmu</h2><div class="card"><p style="margin:0">Kebutuhan kalori sekitar <b>'+maint()+' kkal</b>. Target kalori <b>'+calGoal()+' kkal</b>, target air <b>'+waterGoal()+' ml</b>.</p><p class="note">Ini perkiraan umum dari rumus standar, bukan saran medis. Untuk target penurunan berat yang besar atau kondisi kesehatan tertentu, konsultasikan ke dokter atau ahli gizi.</p></div>':'<p class="empty">Lengkapi usia, tinggi, dan berat badan untuk melihat target kalori dan air.</p>';
   var gap=(p.tw&&lw)?'<p class="date" style="margin-top:8px">Berat terakhir '+lw+' kg, target '+p.tw+' kg, selisih '+Math.abs(lw-p.tw).toFixed(1)+' kg.</p>':'';
   return '<h2>Data diri</h2><div class="card"><div class="fld"><label>Jenis kelamin'+sel('ps',[['p','Perempuan'],['l','Laki-laki']],p.sex)+'</label><label>Usia<input type="number" id="pa" min="10" max="100" value="'+p.age+'"></label><label>Tinggi (cm)<input type="number" id="ph" min="100" max="230" value="'+p.h+'"></label><label>Berat (kg)<input type="number" id="pw" min="30" max="250" step="0.1" value="'+p.w+'"></label><label>Aktivitas'+sel('pc',[[1.2,'Jarang bergerak'],[1.4,'Ringan, 1-3x/minggu'],[1.6,'Sedang, 3-5x/minggu'],[1.8,'Sering, 6-7x/minggu']],p.act)+'</label><label>Tujuan'+sel('pg',[['turun','Menurunkan berat'],['jaga','Menjaga berat'],['naik','Menaikkan berat']],p.goal)+'</label><label>Target berat (kg)<input type="number" id="pt" min="30" max="250" step="0.1" value="'+p.tw+'"></label></div><div class="row"><button class="btn" data-add="profile">Simpan profil</button></div></div>'+est+
-   '<h2>Catat berat hari ini</h2><div class="row" style="margin-top:0"><input type="number" id="lwt" min="30" max="250" step="0.1" value="'+lw+'" aria-label="Berat badan hari ini"><button class="btn" data-add="weight">Simpan berat</button></div>'+gap+'<p class="err" id="err"></p>';}
+   gap+'<p class="note">Berat badan harian dicatat di tab Hari ini.</p><p class="err" id="err"></p>';}
 
 function ico(p){return '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+p+'</svg>';}
 var IC={menu:ico('<path d="M8 6h13M8 12h13M8 18h13"/><path d="M3 6h.01M3 12h.01M3 18h.01"/>'),edit:ico('<path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/>'),trash:ico('<path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/>')};
@@ -248,7 +256,7 @@ function dayItems(t,dn){
   var o=S.ov[t]||{},x=o.x||{},hide=o.hide||[];
   var base=[].concat(
     S.meals.map(function(m){var me=menuOf(m.id,dn);return {k:'meal',id:'m'+m.id,time:m.time,title:m.name,sub:me?me[0]:m.note,kk:me?me[1]:0};}),
-    S.workouts.filter(function(w){return w.day===dn;}).map(function(w){return {k:'move',id:'w'+w.id,time:w.time,title:w.name,sub:w.min+' menit',kk:0};}),
+    S.workouts.filter(function(w){return w.day===dn;}).map(function(w){var rt=routineOf(w.name,dn);return {k:'move',id:'w'+w.id,time:w.time,title:w.name,sub:w.min+' menit'+(rt?' · '+rt.n:''),kk:0};}),
     [{k:'sleep',id:'wake',time:S.sleep.wake,title:'Bangun',sub:'',kk:0},{k:'sleep',id:'bed',time:S.sleep.bed,title:'Tidur',sub:'Target '+fmt(dur(S.sleep.bed,S.sleep.wake)),kk:0}],
     (o.add||[]).map(function(a){return {k:'other',id:'a'+a.id,time:a.time,title:a.title,sub:a.sub||'',kk:0};})
   );
@@ -319,38 +327,111 @@ function act(d){
   }
   return false;
 }
+
+var CATATAN_GYM='Pilih beban yang membuat 2 repetisi terakhir terasa berat tapi bentuk gerakan tetap benar. Istirahat 45-60 detik antar set. Hentikan latihan bila ada nyeri tajam, dan konsultasikan ke dokter atau pelatih bila punya kondisi kesehatan tertentu.';
+var CATATAN_WARM='Lakukan pelan dan terkendali, tanpa memaksa sampai sakit. Tahan tiap peregangan 20-30 detik sambil bernapas normal.';
+var WARM={
+1:{n:'Bahu dan punggung atas',s:[['Jalan di tempat + jumping jack ringan','mulai pelan, naikkan tempo',3],['Putaran bahu dan lengan','10x maju, 10x mundur',2],['Cat-cow','12 gerakan, napas mengikuti',2],['Thread the needle','5x tiap sisi',2],['Peregangan dada di kusen pintu','2x30 detik',2],['Peregangan trisep dan bahu belakang','30 detik tiap sisi',2],['Child pose','napas dalam',2]]},
+2:{n:'Pinggul dan kaki',s:[['Jalan cepat di tempat + lutut tinggi','nikmati naiknya detak jantung',3],['Putaran pinggul','10x tiap arah',2],['Ayunan kaki depan-belakang dan samping','10x tiap kaki',2],['Lunge dengan putaran badan','6x tiap sisi',3],['Peregangan paha depan berdiri','2x30 detik tiap kaki',2],['Peregangan paha belakang','2x30 detik tiap kaki',2],['Peregangan pinggul figure-4','30 detik tiap sisi',1]]},
+3:{n:'Leher, bahu, dan tulang belakang',s:[['Jalan di tempat + putar lengan','tempo santai',3],['Putaran leher pelan','5x tiap arah',2],['Peregangan leher samping','30 detik tiap sisi',2],['Cat-cow + rotasi punggung atas','8x tiap sisi',3],['Peregangan bahu lintas dada','30 detik tiap sisi',2],['Peregangan trisep di atas kepala','30 detik tiap sisi',1],['Child pose dengan lengan ke samping','napas dalam',2]]},
+4:{n:'Betis, pergelangan, dan kaki',s:[['Jalan di tempat + angkat tumit','tempo santai',3],['Putaran pergelangan kaki','10x tiap arah',2],['Calf raise ringan','15x',2],['Peregangan betis di dinding','2x30 detik tiap kaki',3],['Peregangan paha belakang duduk','2x30 detik',2],['Peregangan paha depan','30 detik tiap kaki',2],['Squat tanpa beban pelan','10x',1]]},
+5:{n:'Dinamis seluruh tubuh',s:[['Jumping jack','4x30 detik',2],['Inchworm','8x',2],['Lunge + putar badan','8x tiap sisi',3],['Ayun lengan dan putar badan','20x',2],['Good morning (bungkuk berdiri)','10x',2],['Peregangan seluruh tubuh: raih atas, miring samping','5x tiap sisi',2],['Pernapasan dalam','4 detik tarik, 6 detik buang',2]]},
+6:{n:'Punggung bawah dan pinggul',s:[['Jalan ringan + putaran pinggul','tempo santai',3],['Lutut ke dada berbaring','30 detik tiap sisi',2],['Lutut jatuh ke samping (rotasi lumbar)','10x tiap sisi',2],['Glute bridge','15x',2],['Peregangan piriformis figure-4','30 detik tiap sisi',2],['Peregangan hip flexor (lunge rendah)','30 detik tiap sisi',2],['Child pose','napas dalam',2]]},
+0:{n:'Pemulihan santai seluruh tubuh',s:[['Jalan ringan','tempo santai',3],['Cat-cow','12 gerakan',2],['Downward dog ke plank pelan','8x',2],['Peregangan paha belakang berbaring','dengan handuk, 30 detik tiap kaki',2],['Peregangan pinggul pigeon atau figure-4','30 detik tiap sisi',2],['Peregangan dada dan bahu','2x30 detik',2],['Pernapasan 4-4-6','tarik 4, tahan 4, buang 6',2]]}
+};
+Object.keys(WARM).forEach(function(k){WARM[k].t=CATATAN_WARM;});
+var GYM={
+1:{n:'Dada dan trisep',s:[['Set ringan bench press atau push-up','1x12 pemanasan',3],['Bench press atau push-up berbeban','3x10',7],['Incline dumbbell press','3x12',6],['Dumbbell fly atau cable fly','3x12',5],['Triceps pushdown','3x12',5],['Dips bangku atau overhead extension','2x12',4]]},
+2:{n:'Punggung dan bisep',s:[['Set ringan lat pulldown','1x12 pemanasan',3],['Lat pulldown atau pull-up dibantu','3x10',7],['Seated cable row','3x12',6],['Dumbbell row','3x12 tiap sisi',6],['Biceps curl','3x12',5],['Hammer curl','2x12',3]]},
+3:{n:'Kaki: paha depan dan glutes',s:[['Squat tanpa beban','15x pemanasan',3],['Goblet atau barbell squat','3x10',7],['Leg press','3x12',6],['Walking lunge','3x10 tiap kaki',6],['Leg extension','3x15',5],['Calf raise','3x15',3]]},
+4:{n:'Bahu dan core',s:[['Set ringan dengan band atau dumbbell ringan','1x15 pemanasan',3],['Shoulder press','3x10',7],['Lateral raise','3x12',5],['Rear delt fly','3x12',5],['Plank','3x40 detik',5],['Russian twist atau leg raise','2x15',5]]},
+5:{n:'Seluruh tubuh (gerakan majemuk)',s:[['Pemanasan: row ringan + squat tubuh','2 set ringan',3],['Romanian deadlift ringan','3x10',7],['Push-up atau bench press','3x10',6],['Dumbbell row','3x10',5],['Goblet squat','3x12',5],['Farmer carry','3x30 detik',4]]},
+6:{n:'Kaki: paha belakang dan glutes',s:[['Glute bridge','15x pemanasan',3],['Romanian deadlift','3x10',7],['Hip thrust','3x12',6],['Bulgarian split squat','3x10 tiap kaki',6],['Leg curl','3x12',5],['Plank samping','2x30 detik tiap sisi',3]]},
+0:{n:'Kardio interval dan core (lebih ringan)',s:[['Jalan atau jogging ringan','pemanasan',4],['Interval: 30 detik cepat, 60 detik santai','8 putaran',12],['Mountain climber','3x30 detik',4],['Dead bug','3x12',4],['Bird dog','3x10 tiap sisi',3],['Jalan pendinginan','napas dipelankan',3]]}
+};
+Object.keys(GYM).forEach(function(k){GYM[k].t=CATATAN_GYM;});
+function routineOf(title,dn){var s=String(title).toLowerCase();if(/pemanasan|peregangan/.test(s))return WARM[dn];if(/gym|berat|beban|angkat/.test(s))return GYM[dn];return null;}
+var openFd={};
+function failId(id,m){var e=document.getElementById(id);if(e)e.textContent=m;}
+function routineHtml(i,dn){
+  var r=routineOf(i.title,dn);if(!r)return '';
+  var key='r'+i.id,tot=r.s.reduce(function(a,x){return a+x[2];},0);
+  return '<details class="fd" data-fd="'+key+'"'+(openFd[key]?' open':'')+'><summary>Lihat latihan: '+esc(r.n)+' ('+tot+' menit)</summary>'+
+    r.s.map(function(x,n){return '<div class="st"><span class="n">'+(n+1)+'</span><div><b>'+esc(x[0])+'</b><small>'+esc(x[1])+' · '+x[2]+' menit</small></div></div>';}).join('')+
+    '<p class="note">'+esc(r.t)+'</p></details>';
+}
+function foodBlock(t,key,ids,label){
+  var sum=0,li='';
+  (S.cal[t]||[]).forEach(function(c,idx){
+    var k=c.m||c.src||'other',mine=key==='other'?ids.indexOf(k)<0:k===key;
+    if(!mine)return;
+    sum+=c.kcal;
+    li+='<div class="fl"><div><b>'+esc(c.name)+'</b><small>'+c.kcal+' kkal</small></div><button class="ic rm" data-del="cal:'+idx+'" aria-label="Hapus '+esc(c.name)+'" title="Hapus">'+IC.trash+'</button></div>';
+  });
+  return '<details class="fd" data-fd="'+key+'"'+(openFd[key]?' open':'')+'><summary>'+label+(sum?' · '+sum+' kkal':'')+'</summary>'+li+
+    '<div class="ff"><div class="row"><input type="text" class="fn" list="fl" autocomplete="off" placeholder="Makanan, mis. 2 telur rebus + nasi merah" aria-label="Nama makanan"><input type="number" class="fk" min="1" max="5000" placeholder="kkal" aria-label="Kalori"></div><p class="note hint">Ketik menu, kkal terisi otomatis sebagai perkiraan. Bisa diubah manual.</p><div class="row"><button class="btn" data-addfood="'+key+'">Tambah makanan</button></div><p class="err ferr"></p></div></details>';
+}
+function waterCard(t){
+  var w=S.water[t]||0,wg=waterGoal();
+  return '<h2>Air minum</h2><div class="card"><p class="big" style="font-size:2rem">'+w+' ml</p><div class="bar s"><i style="width:'+pctw(w,wg)+'%;background:var(--sleep)"></i></div><p class="date" style="margin-top:8px">Target '+wg+' ml'+(P().w?'':', isi berat badan di Profil untuk target pribadi')+'</p>'+
+    '<div class="row"><button class="btn" data-water="250">+ Gelas 250</button><button class="btn" data-water="500">+ Botol 500</button><button class="del" data-water="-250">Kurangi 250</button></div></div>';
+}
+function weightCard(t){
+  var ws=S.weights.slice().sort(function(a,b){return a.date.localeCompare(b.date);});
+  var tw=ws.filter(function(x){return x.date===t;})[0],prev=ws.filter(function(x){return x.date<t;}).pop(),info;
+  if(tw&&prev){var df=tw.w-prev.w;info='Hari ini '+tw.w+' kg, '+(Math.abs(df)<0.05?'sama dengan':(df>0?'naik ':'turun ')+Math.abs(df).toFixed(1)+' kg dari')+' catatan sebelumnya ('+prev.w+' kg).';}
+  else if(tw)info='Hari ini '+tw.w+' kg.';
+  else if(prev)info='Catatan terakhir '+prev.w+' kg ('+prev.date+'). Belum ada catatan hari ini.';
+  else info='Belum ada catatan berat badan.';
+  var cur=tw?tw.w:(prev?prev.w:''),tg=(P().tw&&cur)?' Target '+P().tw+' kg, selisih '+Math.abs(cur-P().tw).toFixed(1)+' kg.':'';
+  var hist=ws.slice(-7).reverse().map(function(x){return '<div class="fl"><div><b>'+x.w+' kg</b></div><small>'+x.date+'</small></div>';}).join('');
+  return '<h2>Berat badan harian</h2><div class="card"><div class="row" style="margin-top:0"><input type="number" id="lwt" min="30" max="250" step="0.1" value="'+(tw?tw.w:'')+'" placeholder="kg" aria-label="Berat badan hari ini"><button class="btn" data-add="weight">Simpan berat</button></div><p class="date" style="margin-top:8px">'+info+tg+'</p><p class="err" id="errw"></p>'+
+    (hist?'<details class="fd" data-fd="wh"'+(openFd.wh?' open':'')+'><summary>Riwayat berat badan</summary>'+hist+'</details>':'')+'</div>';
+}
+function calCard(t){
+  var c=calToday(t),cg=calGoal();
+  return '<h2>Kalori hari ini</h2><div class="card"><p class="big" style="font-size:2rem">'+c+' kkal</p>'+(cg?'<div class="bar s"><i style="width:'+pctw(c,cg)+'%;background:var(--meal)"></i></div><p class="date" style="margin-top:8px">Target sekitar '+cg+' kkal, sisa '+Math.max(0,cg-c)+'</p>':'<p class="date">Isi Profil untuk melihat target kalori.</p>')+'</div>';
+}
 function vHari(){
   var now=new Date(),t=dk(now),dn=now.getDay(),done=S.done[t]||[],items=dayItems(t,dn);
   var nm=pad(now.getHours())+':'+pad(now.getMinutes()),marked=false,rows='';
   var nowRow='<li class="now"><span>Sekarang, '+nm+'</span></li>';
   var logged=(S.cal[t]||[]).map(function(c){return c.src;});
+  var mealIds=items.filter(function(i){return i.k==='meal';}).map(function(i){return i.id;});
   items.forEach(function(i){
     if(!marked&&i.time>nm){rows+=nowRow;marked=true;}
     var d=done.indexOf(i.id)>-1,body;
     if(editing===i.id){
       body='<div class="row" style="margin-top:0"><input type="time" id="et" value="'+i.time+'" aria-label="Jam"><input type="text" id="en" value="'+esc(i.title)+'" aria-label="Nama kegiatan"><input type="text" id="es" value="'+esc(i.sub)+'" placeholder="Catatan atau menu" aria-label="Catatan"></div><div class="act"><button class="sm" data-save="'+i.id+'">Simpan</button><button class="ic rm" data-hide="'+i.id+'" aria-label="Hapus hari ini" title="Hapus hari ini">'+IC.trash+'</button><button class="sm" data-cancel="1">Batal</button></div>';
     }else{
-      body='<div class="rr"><label><input type="checkbox" data-done="'+i.id+'"'+(d?' checked':'')+'><span><b>'+esc(i.title)+'</b>'+(i.sub?'<small>'+esc(i.sub)+(i.kk?' (±'+i.kk+' kkal)':'')+'</small>':'')+'</span></label><div class="ib"><button class="ic" data-edit="'+i.id+'" aria-label="Ubah '+esc(i.title)+'" title="Ubah">'+IC.edit+'</button><button class="ic rm" data-hide="'+i.id+'" aria-label="Hapus '+esc(i.title)+' hari ini" title="Hapus hari ini">'+IC.trash+'</button></div></div>'+(i.kk?'<div class="act">'+(logged.indexOf(i.id)>-1?'<span class="tag">Sudah dicatat di kalori</span>':'<button class="sm" data-logmenu="'+i.id+'">Catat kkal</button>')+'</div>':'');
+      body='<div class="rr"><label><input type="checkbox" data-done="'+i.id+'"'+(d?' checked':'')+'><span><b>'+esc(i.title)+'</b>'+(i.sub?'<small>'+esc(i.sub)+(i.kk?' (±'+i.kk+' kkal)':'')+'</small>':'')+'</span></label><div class="ib"><button class="ic" data-edit="'+i.id+'" aria-label="Ubah '+esc(i.title)+'" title="Ubah">'+IC.edit+'</button><button class="ic rm" data-hide="'+i.id+'" aria-label="Hapus '+esc(i.title)+' hari ini" title="Hapus hari ini">'+IC.trash+'</button></div></div>'+
+        (i.kk?'<div class="act">'+(logged.indexOf(i.id)>-1?'<span class="tag">Menu saran sudah dicatat</span>':'<button class="sm" data-logmenu="'+i.id+'">Catat menu saran</button>')+'</div>':'')+
+        (i.k==='meal'?foodBlock(t,i.id,mealIds,'Catat makanan'):'')+
+        (i.k==='move'?routineHtml(i,dn):'');
     }
     rows+='<li class="'+i.k+(d?' done':'')+'"><time>'+i.time+'</time><div class="rc">'+body+'</div></li>';
   });
   if(!marked)rows+=nowRow;
   var n=items.filter(function(i){return done.indexOf(i.id)>-1;}).length,pct=items.length?Math.round(n/items.length*100):0;
   var ov=S.ov[t],changed=ov&&((ov.add||[]).length||(ov.hide||[]).length||Object.keys(ov.x||{}).length);
-  return '<p class="date">'+FULL[dn]+', '+now.getDate()+' '+now.toLocaleDateString('id-ID',{month:'long'})+'</p><p class="big">'+n+' dari '+items.length+' selesai</p><div class="bar"><i style="width:'+pct+'%"></i></div>'+mini(t)+'<ul class="tl">'+rows+'</ul>'+
+  return '<p class="date">'+FULL[dn]+', '+now.getDate()+' '+now.toLocaleDateString('id-ID',{month:'long'})+'</p><p class="big">'+n+' dari '+items.length+' selesai</p><div class="bar"><i style="width:'+pct+'%"></i></div>'+
+    waterCard(t)+weightCard(t)+calCard(t)+
+    '<h2>Jadwal hari ini</h2><ul class="tl">'+rows+'</ul>'+
+    '<h2>Makanan di luar jadwal makan</h2><div class="card">'+foodBlock(t,'other',mealIds,'Catat camilan atau makanan lain')+'</div>'+
+    '<datalist id="fl">'+FOODS.map(function(f){return '<option value="'+f[0]+'">';}).join('')+'</datalist>'+
     '<h2>Tambah kegiatan hari ini</h2><div class="row" style="margin-top:0"><input type="time" id="at" value="12:00" aria-label="Jam"><input type="text" id="an" placeholder="Nama kegiatan" aria-label="Nama kegiatan"><button class="btn" data-add="today">Tambah</button></div><p class="err" id="errt"></p>'+
     (changed?'<div class="row"><button class="sm" data-reset="1">Kembalikan jadwal hari ini ke default</button></div>':'')+
     '<details id="defd"'+(openDef?' open':'')+'><summary>Atur jadwal default</summary><p class="note">Perubahan di sini berlaku untuk hari-hari berikutnya. Untuk mengubah hari ini saja, pakai tombol Ubah di atas.</p>'+vJadwal()+'</details>';
 }
 document.addEventListener('input',function(e){
-  var t=e.target;
-  if(t.id==='cn'){var r=est(t.value),h=$('#hint'),ck=$('#ck');if(h)h.textContent=r.txt;if(ck&&!ck.dataset.man)ck.value=r.k||'';}
-  if(t.id==='ck'){t.dataset.man=t.value?'1':'';}
+  var t=e.target,ff=t.closest&&t.closest('.ff');if(!ff)return;
+  if(t.classList.contains('fn')){var r=est(t.value),h=ff.querySelector('.hint'),ck=ff.querySelector('.fk');if(h)h.textContent=r.txt;if(ck&&!ck.dataset.man)ck.value=r.k||'';}
+  if(t.classList.contains('fk')){t.dataset.man=t.value?'1':'';}
 });
-document.addEventListener('toggle',function(e){if(e.target.id==='defd')openDef=e.target.open;},true);
+document.addEventListener('toggle',function(e){var t=e.target;if(t.id==='defd')openDef=t.open;if(t.dataset&&t.dataset.fd)openFd[t.dataset.fd]=t.open;},true);
 
 function render(){
-  $('#tabs').innerHTML=[['today','Hari ini'],['catat','Catat'],['profil','Profil']].map(function(p){return '<button role="tab" aria-selected="'+(tab===p[0])+'" data-tab="'+p[0]+'">'+p[1]+'</button>';}).join('');
+  $('#tabs').innerHTML=[['today','Hari ini'],['profil','Profil']].map(function(p){return '<button role="tab" aria-selected="'+(tab===p[0])+'" data-tab="'+p[0]+'">'+p[1]+'</button>';}).join('');
   $('#app').innerHTML={today:vHari,catat:vCatat,profil:vProfil}[tab]();
 }
 function fail(msg){var e=$('#err');if(e)e.textContent=msg;}
@@ -360,6 +441,11 @@ document.addEventListener('click',function(e){
   var d=b.dataset;
   if(d.tab){tab=d.tab;render();return;}
   if(act(d))return;
+  if(d.addfood!==undefined){
+    var ff=b.closest('.ff'),fn=ff.querySelector('.fn').value.trim(),fk=parseInt(ff.querySelector('.fk').value,10),fe=ff.querySelector('.ferr');
+    if(!fn||!(fk>0)){fe.textContent='Isi nama makanan dan kalorinya dulu.';return;}
+    var tk2=dk(new Date());(S.cal[tk2]=S.cal[tk2]||[]).push({name:fn,kcal:fk,m:d.addfood});
+    openFd[d.addfood]=true;save();render();return;}
   if(d.sub){sub=d.sub;render();return;}
   if(d.water){var wk0=dk(new Date());S.water[wk0]=Math.max(0,(S.water[wk0]||0)+parseInt(d.water,10));save();render();return;}
   if(d.wday!==undefined){wday=+d.wday;render();return;}
@@ -378,7 +464,7 @@ document.addEventListener('click',function(e){
     S.workouts.push({id:S.next++,day:wday,time:wt,name:wn,min:wm});save();render();return;}
   if(d.add==='cal'){var cn=$('#cn').value.trim(),ck=parseInt($('#ck').value,10);if(!cn||!(ck>0)){fail('Isi nama makanan dan kalorinya dulu.');return;}var tk=dk(new Date());(S.cal[tk]=S.cal[tk]||[]).push({name:cn,kcal:ck});save();render();return;}
   if(d.add==='profile'){var pr=S.profile;pr.sex=$('#ps').value;pr.age=$('#pa').value;pr.h=$('#ph').value;pr.w=$('#pw').value;pr.act=+$('#pc').value;pr.goal=$('#pg').value;pr.tw=$('#pt').value;save();render();return;}
-  if(d.add==='weight'){var wn2=parseFloat($('#lwt').value);if(!(wn2>0)){fail('Isi berat badan dulu.');return;}var wd=dk(new Date());S.weights=S.weights.filter(function(x){return x.date!==wd;});S.weights.push({date:wd,w:wn2});S.profile.w=String(wn2);save();render();return;}
+  if(d.add==='weight'){var wn2=parseFloat($('#lwt').value);if(!(wn2>0)){failId('errw','Isi berat badan dulu.');return;}var wd=dk(new Date());S.weights=S.weights.filter(function(x){return x.date!==wd;});S.weights.push({date:wd,w:wn2});S.profile.w=String(wn2);save();render();return;}
   if(d.add==='log'){
     var bed=$('#lb').value,wk=$('#lw').value;if(!bed||!wk)return;
     var y=new Date();var date=dk(y);
