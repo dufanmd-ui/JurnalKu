@@ -1,0 +1,245 @@
+<!doctype html>
+<html lang="id"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Menu dan Order Restoran</title>
+<script>try{var tt=localStorage.getItem('jk-tema');if(tt)document.documentElement.setAttribute('data-theme',tt)}catch(e){}</script>
+<style>
+:root{--bg:#faf7f2;--card:#fff;--tx:#2a2420;--mu:#7a6f66;--ac:#c2410c;--bd:#e7ded3;--ok:#15803d;--no:#b91c1c;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);color-scheme:light}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#1c1917;--card:#292524;--tx:#f5efe8;--mu:#a8a098;--ac:#fb923c;--bd:#3f3a36;--ok:#4ade80;--no:#f87171;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#1c1917;--card:#292524;--tx:#f5efe8;--mu:#a8a098;--ac:#fb923c;--bd:#3f3a36;--ok:#4ade80;--no:#f87171;color-scheme:dark}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--tx);font:15px/1.4 system-ui,-apple-system,"Segoe UI",sans-serif}
+main{max-width:720px;margin:0 auto;padding:12px}
+h1{font-size:20px;margin:6px 0}h2{font-size:15px;margin:18px 0 8px;color:var(--ac);text-transform:uppercase;letter-spacing:.05em}
+nav{display:flex;gap:6px;margin:8px 0;flex-wrap:wrap}
+button,input,select{font:inherit;color:inherit}
+button{border:1px solid var(--bd);background:var(--card);border-radius:8px;padding:8px 12px;cursor:pointer}
+button:disabled{opacity:.55;cursor:default}
+button.p{background:var(--ac);border-color:var(--ac);color:#fff}
+nav button.on{background:var(--ac);color:#fff;border-color:var(--ac)}
+input,select{background:var(--card);border:1px solid var(--bd);border-radius:8px;padding:8px;width:100%}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:10px;margin-bottom:8px}
+.it{display:flex;gap:10px;align-items:center}
+.it img,.ph{width:64px;height:64px;border-radius:10px;object-fit:cover;background:var(--bd);flex:none}
+.g{flex:1;min-width:0}.mu{color:var(--mu);font-size:13px}.row{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.q{display:flex;align-items:center;gap:8px}.q b{min-width:22px;text-align:center}
+.bad{color:var(--no);font-weight:600}.ok{color:var(--ok);font-weight:600}
+.f{display:grid;gap:6px;grid-template-columns:1fr 1fr}.f .w{grid-column:1/3}
+.lnk{color:var(--mu);text-decoration:none;font-size:14px}
+.bdg{background:var(--no);color:#fff;border-radius:10px;padding:0 7px;font-size:12px;margin-left:4px}
+.ft{margin:22px 0 10px;text-align:center}
+.ft button{background:none;border:0;color:var(--mu);font-size:13px;text-decoration:underline}
+#pa{display:none;font-family:ui-monospace,monospace;max-width:80mm;color:#000;background:#fff}
+#pa .l{display:flex;justify-content:space-between}#pa hr{border:0;border-top:1px dashed #000}
+@media print{:root{padding:0}body>*:not(#pa){display:none!important}#pa{display:block}}
+</style></head><body>
+<main>
+<div><a href="./" class="lnk">← Menu</a></div>
+<h1 id="ttl">🍽️ Restoran</h1>
+<div id="banner"></div>
+<nav id="nav"></nav>
+<div id="v"></div>
+<div class="ft" id="ft"></div>
+</main>
+<div id="pa"></div>
+<script src="config-restoran.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
+<script>
+const CFG=window.RS||{};
+const $=s=>document.querySelector(s);
+const h=(t,a={},...k)=>{const e=document.createElement(t);for(const[x,y]of Object.entries(a)){if(x.startsWith('on'))e[x]=y;else if(x==='class')e.className=y;else if(y===false||y==null){}else if(y===true)e.setAttribute(x,'');else e.setAttribute(x,y)}e.append(...k.flat().filter(c=>c!=null&&c!==false));return e};
+const rp=n=>'Rp '+Number(n||0).toLocaleString('id-ID');
+const gagalImg=e=>e.target.replaceWith(h('div',{class:'ph'}));
+const safeImg=u=>/^https:\/\//.test(u||'')?u:'';
+const S={nama:'Restoran',open:true,menu:[],orders:[],cart:{},form:{n:'',t:(location.hash.match(/^#meja-(\w+)/)||[])[1]||''},cred:null,owner:false,tab:'order',err:'',msg:'',login:false,busy:false,sigM:'',sigO:'',known:null};
+try{S.cred=JSON.parse(localStorage.getItem('rs-cred')||'null')}catch(e){}
+let ac=null;
+document.addEventListener('click',()=>{if(!ac)try{ac=new(window.AudioContext||window.webkitAudioContext)()}catch(e){}});
+function bunyi(){try{if(!ac)return;const o=ac.createOscillator(),g=ac.createGain();o.connect(g);g.connect(ac.destination);o.frequency.value=880;g.gain.value=.15;o.start();o.stop(ac.currentTime+.25)}catch(e){}}
+
+/* ===== API ===== */
+async function api(act,extra,auth){
+  if(!CFG.API_URL||CFG.API_URL.indexOf('ISI_')===0)throw{code:'config'};
+  const body=Object.assign({act},extra||{});
+  if(auth){if(!S.cred)throw{code:'auth'};body.email=S.cred.email;body.kode=S.cred.kode}
+  let r,j;
+  try{r=await fetch(CFG.API_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(body)})}catch(e){throw{code:'net'}}
+  try{j=await r.json()}catch(e){throw{code:'resp'}}
+  if(!j.ok)throw{code:j.code||'err',message:j.error||''};
+  return j;
+}
+function galat(e){
+  const c=e&&e.code;
+  if(c==='config')return 'Alamat API belum diisi. Buka config-restoran.js dan isi API_URL.';
+  if(c==='auth')return 'Email atau kode akses salah.';
+  if(c==='locked')return 'Terlalu banyak percobaan. Coba lagi 15 menit.';
+  if(c==='net')return 'Tidak ada koneksi internet.';
+  if(c==='resp')return 'Jawaban server tidak terbaca. Periksa API_URL dan pastikan deploy Apps Script memakai akses Anyone.';
+  return(e&&e.message)?String(e.message).slice(0,200):'Terjadi kesalahan.';
+}
+
+/* ===== RENDER ===== */
+function typing(){const a=document.activeElement;return a&&(a.tagName==='INPUT'||a.tagName==='SELECT')&&a.closest&&a.closest('#v')}
+function render(force){
+  if(!force&&typing())return;
+  document.title=S.nama;$('#ttl').textContent='🍽️ '+S.nama;
+  $('#banner').replaceChildren(...(S.err?[h('div',{class:'card bad'},S.err)]:[]),...(!S.open?[h('div',{class:'card bad'},'Mohon maaf, pemesanan sedang ditutup.')]:[]));
+  const baru=S.orders.filter(o=>o.status!=='selesai').length;
+  const tabs=S.owner?[['order','Pesan'],['menu','Kelola Menu'],['orders','Pesanan Masuk'+(baru?'|'+baru:'')],['qr','QR Code']]:[];
+  $('#nav').replaceChildren(...tabs.map(([k,l])=>{const[t,b]=l.split('|');return h('button',{class:S.tab===k?'on':'',onclick:()=>{S.tab=k;S.msg='';render(true);if(k==='orders')muatPesanan()}},t,b?h('span',{class:'bdg'},b):null)}));
+  const v=S.owner&&S.tab==='menu'?vMenu():S.owner&&S.tab==='orders'?vOrders():S.owner&&S.tab==='qr'?vQR():vOrder();
+  $('#v').replaceChildren(...(S.msg?[h('div',{class:'card ok'},S.msg)]:[]),v);
+  $('#ft').replaceChildren(...footer());
+}
+function footer(){
+  if(S.owner)return[h('button',{onclick:keluar},'Keluar (pemilik)')];
+  if(!S.login)return[h('button',{onclick:()=>{S.login=true;render(true)}},'Masuk pemilik')];
+  const em=h('input',{type:'email',placeholder:'Email',autocomplete:'username',value:S.lastEmail||(S.cred?S.cred.email:'')}),kd=h('input',{type:'password',placeholder:'Kode akses',autocomplete:'current-password'});
+  const go=async b=>{
+    const email=em.value.trim().toLowerCase(),kode=kd.value.trim();if(!email||!kode){S.err='Isi email dan kode akses.';render(true);return}
+    b.disabled=true;S.lastEmail=email;S.cred={email,kode};
+    try{await api('login',{},true);try{localStorage.setItem('rs-cred',JSON.stringify(S.cred))}catch(e){}
+      S.owner=true;S.login=false;S.err='';S.tab='orders';render(true);muatPesanan()}
+    catch(e){S.cred=null;S.err=galat(e);b.disabled=false;render(true)}
+  };
+  const btn=h('button',{class:'p',onclick:e=>go(e.target)},'Masuk');
+  return[h('div',{class:'card f',style:'text-align:left'},h('div',{class:'w'},em),h('div',{class:'w'},kd),h('button',{onclick:()=>{S.login=false;render(true)}},'Batal'),btn)];
+}
+function keluar(){S.cred=null;S.owner=false;S.orders=[];S.known=null;S.tab='order';try{localStorage.removeItem('rs-cred')}catch(e){}render(true)}
+
+/* ===== PELANGGAN ===== */
+function vOrder(){
+  const box=h('div'),cats=[...new Set(S.menu.map(m=>m.cat||'Menu'))];
+  if(!S.menu.length)box.append(h('p',{class:'mu'},S.err?'':'Menu belum tersedia.'));
+  for(const c of cats){
+    box.append(h('h2',{},c));
+    for(const m of S.menu.filter(x=>(x.cat||'Menu')===c)){
+      const ok=m.avail!==false&&S.open,q=S.cart[m.id]||0,img=safeImg(m.img);
+      box.append(h('div',{class:'card it'},img?h('img',{src:img,alt:m.name,loading:'lazy',referrerpolicy:'no-referrer',onerror:gagalImg}):h('div',{class:'ph'}),
+        h('div',{class:'g'},h('b',{},m.name),h('div',{class:'mu'},rp(m.price))),
+        ok?h('div',{class:'q'},h('button',{onclick:()=>setQ(m.id,q-1),'aria-label':'Kurangi '+m.name},'−'),h('b',{},q),h('button',{onclick:()=>setQ(m.id,q+1),'aria-label':'Tambah '+m.name},'+')):h('span',{class:'bad'},'Habis')));
+    }
+  }
+  const items=S.menu.filter(m=>S.cart[m.id]>0&&m.avail!==false),total=items.reduce((s,m)=>s+m.price*S.cart[m.id],0);
+  if(items.length&&S.open){
+    box.append(h('h2',{},'Pesanan Anda'),h('div',{class:'card'},
+      ...items.map(m=>h('div',{class:'row',style:'justify-content:space-between'},h('span',{},S.cart[m.id]+'× '+m.name),h('span',{},rp(m.price*S.cart[m.id])))),
+      h('hr'),h('div',{class:'row',style:'justify-content:space-between'},h('b',{},'Total'),h('b',{},rp(total))),
+      h('div',{class:'f',style:'margin-top:8px'},
+        h('input',{id:'cn',placeholder:'Nama (opsional)',maxlength:40,value:S.form.n,oninput:e=>S.form.n=e.target.value}),
+        h('input',{id:'ct',placeholder:'No. meja',maxlength:12,value:S.form.t,oninput:e=>S.form.t=e.target.value}),
+        h('button',{class:'p w',disabled:S.busy,onclick:()=>kirim(items)},S.busy?'Mengirim...':'Kirim Pesanan'))));
+  }
+  return box;
+}
+function setQ(id,q){S.cart[id]=Math.max(0,Math.min(50,q));S.msg='';render(true)}
+async function kirim(items){
+  if(!S.open||S.busy)return;S.busy=true;S.err='';render(true);
+  try{
+    const r=await api('pesan',{items:items.map(m=>({id:m.id,qty:S.cart[m.id]})),name:S.form.n.trim(),table:S.form.t.trim()});
+    S.cart={};S.form.n='';S.msg='✅ Pesanan terkirim! Nomor order: '+r.no+' (total '+rp(r.total)+')';
+  }catch(e){S.err=galat(e);if(e&&e.code!=='net'&&e.code!=='resp')muatMenu(true)}
+  S.busy=false;render(true);window.scrollTo(0,0);
+}
+
+/* ===== PEMILIK: MENU ===== */
+function kecilkan(file,max){return new Promise((res,rej)=>{const u=URL.createObjectURL(file),im=new Image();im.onload=()=>{const sc=Math.min(1,max/Math.max(im.width,im.height)),c=document.createElement('canvas');c.width=Math.max(1,Math.round(im.width*sc));c.height=Math.max(1,Math.round(im.height*sc));c.getContext('2d').drawImage(im,0,0,c.width,c.height);URL.revokeObjectURL(u);res(c.toDataURL('image/jpeg',.78).split(',')[1])};im.onerror=()=>{URL.revokeObjectURL(u);rej(new Error('Gambar tidak bisa dibaca.'))};im.src=u})}
+async function unggahFoto(file){const b64=await kecilkan(file,480);return(await api('foto',{data:b64},true)).url}
+async function ubahMenu(data,keras){
+  try{await api('menu_simpan',data,true);S.err='';await muatMenu(true)}
+  catch(e){S.err=galat(e);if(e&&e.code==='auth')keluar();else render(true)}
+}
+function vMenu(){
+  const box=h('div'),file=h('input',{type:'file',accept:'image/*',class:'w'});
+  box.append(h('div',{class:'card row',style:'justify-content:space-between'},h('b',{class:S.open?'ok':'bad'},S.open?'Pemesanan: BUKA':'Pemesanan: TUTUP'),
+    h('button',{onclick:async()=>{try{await api('buka',{buka:!S.open},true);await muatMenu(true)}catch(e){S.err=galat(e);render(true)}}},S.open?'Tutup semua order':'Buka order')));
+  const nm=h('input',{placeholder:'Nama menu',maxlength:80}),pr=h('input',{type:'number',placeholder:'Harga',min:0}),ct=h('input',{placeholder:'Sub-menu (mis. Makanan)',list:'cl',class:'w',maxlength:40});
+  box.append(h('datalist',{id:'cl'},...[...new Set(S.menu.map(m=>m.cat).filter(Boolean))].map(c=>h('option',{value:c}))),
+    h('h2',{},'Tambah Menu'),h('div',{class:'card f'},nm,pr,ct,file,
+    h('button',{class:'p w',onclick:async e=>{
+      if(!nm.value.trim()||!pr.value){S.err='Isi nama dan harga.';render(true);return}
+      const b=e.target;b.disabled=true;b.textContent='Menyimpan...';let img='';
+      try{if(file.files[0])img=await unggahFoto(file.files[0])}catch(x){S.err='Foto gagal diunggah: '+galat(x)+' Menu disimpan tanpa foto.'}
+      await ubahMenu({nama:nm.value.trim(),harga:+pr.value,kat:ct.value.trim()||'Menu',foto:img});
+      render(true);
+    }},'Simpan Menu')),h('h2',{},'Daftar Menu'));
+  for(const m of S.menu){
+    const pick=h('input',{type:'file',accept:'image/*',style:'display:none',onchange:async e=>{
+      const f=e.target.files[0];if(!f)return;
+      try{const u=await unggahFoto(f);await ubahMenu({id:m.id,foto:u})}catch(x){S.err='Foto gagal diunggah: '+galat(x);render(true)}
+    }}),img=safeImg(m.img);
+    box.append(h('div',{class:'card it'},img?h('img',{src:img,alt:m.name,referrerpolicy:'no-referrer',onerror:gagalImg}):h('div',{class:'ph'}),
+      h('div',{class:'g'},h('input',{value:m.name,maxlength:80,onchange:e=>ubahMenu({id:m.id,nama:e.target.value})}),
+      h('div',{class:'row',style:'margin-top:4px'},h('input',{type:'number',value:m.price,min:0,style:'width:110px',onchange:e=>ubahMenu({id:m.id,harga:+e.target.value})}),
+        h('input',{value:m.cat||'',list:'cl',maxlength:40,style:'width:130px',onchange:e=>ubahMenu({id:m.id,kat:e.target.value})}))),
+      h('div',{class:'row',style:'flex-direction:column'},
+        h('button',{onclick:()=>ubahMenu({id:m.id,ada:m.avail===false})},m.avail===false?'Set Tersedia':'Set Habis'),
+        h('button',{onclick:()=>pick.click()},'Ganti foto'),pick,
+        h('button',{onclick:async()=>{if(!confirm('Hapus '+m.name+'?'))return;try{await api('menu_hapus',{id:m.id},true);await muatMenu(true)}catch(e){S.err=galat(e);render(true)}}},'Hapus'))));
+  }
+  return box;
+}
+
+/* ===== PEMILIK: QR ===== */
+function vQR(){
+  const url=h('input',{value:location.href.split('#')[0]}),tb=h('input',{placeholder:'No. meja (kosongkan untuk QR umum)'}),out=h('div',{style:'text-align:center;margin:12px 0'});let cur='';
+  const gen=()=>{try{const t=tb.value.trim().replace(/[^\w]/g,''),u=url.value.trim().split('#')[0]+(t?'#meja-'+t:'');const q=qrcode(0,'M');q.addData(u);q.make();cur=q.createSvgTag(8,4);out.innerHTML=cur;out.append(h('div',{class:'mu'},u))}catch(e){out.textContent='Gagal membuat QR (periksa koneksi internet).'}};
+  const pr=()=>{if(!cur)gen();if(!cur)return;const p=$('#pa');p.replaceChildren(h('h3',{style:'text-align:center'},'Scan untuk memesan'));const d=h('div',{style:'text-align:center'});d.innerHTML=cur;p.append(d,h('p',{style:'text-align:center'},tb.value.trim()?'Meja '+tb.value.trim():''));window.print()};
+  return h('div',{},h('h2',{},'QR Code Pemesanan'),h('div',{class:'card f'},h('label',{class:'w mu'},'Link halaman pemesanan'),h('div',{class:'w'},url),tb,h('button',{class:'p',onclick:gen},'Buat QR')),out,h('button',{onclick:pr},'🖨 Cetak QR'));
+}
+
+/* ===== PEMILIK: PESANAN + CETAK ===== */
+function vOrders(){
+  const box=h('div');if(!S.orders.length)box.append(h('p',{class:'mu'},'Belum ada pesanan.'));
+  for(const o of S.orders)box.append(h('div',{class:'card'},
+    h('div',{class:'row',style:'justify-content:space-between'},h('b',{},o.no),h('span',{class:o.status==='selesai'?'ok':'bad'},o.status)),
+    h('div',{class:'mu'},`${o.day}, ${o.date} • ${o.time}${o.table?' • Meja '+o.table:''}${o.name?' • '+o.name:''}`),
+    h('div',{},o.items.map(i=>i.qty+'× '+i.name).join(', ')),h('b',{},rp(o.total)),
+    h('div',{class:'row',style:'margin-top:6px'},h('button',{onclick:()=>cetak(o,'dapur')},'🖨 Cetak Dapur'),h('button',{onclick:()=>cetak(o,'bill')},'🧾 Cetak Bill'),
+    o.status!=='selesai'&&h('button',{onclick:async()=>{try{await api('selesai',{no:o.no},true);o.status='selesai';render(true)}catch(e){S.err=galat(e);render(true)}}},'Selesai'))));
+  return box;
+}
+function cetak(o,kind){
+  const bill=kind==='bill',p=$('#pa');
+  p.replaceChildren(h('h3',{style:'text-align:center;margin:0'},S.nama),h('div',{style:'text-align:center'},bill?'BILL PEMBAYARAN':'PESANAN DAPUR'),h('hr'),
+    h('div',{},'No : '+o.no),h('div',{},'Hari: '+o.day),h('div',{},'Tgl : '+o.date),h('div',{},'Jam : '+o.time),
+    o.table&&h('div',{},'Meja: '+o.table),o.name&&h('div',{},'Nama: '+o.name),h('hr'),
+    ...o.items.map(i=>h('div',{class:'l'},h('span',{},i.qty+'× '+i.name),bill&&h('span',{},rp(i.price*i.qty)))),h('hr'),
+    bill&&h('div',{class:'l'},h('b',{},'TOTAL'),h('b',{},rp(o.total))),bill&&h('p',{style:'text-align:center'},'Terima kasih 🙏'));
+  window.print();
+}
+
+/* ===== MUAT DATA ===== */
+async function muatMenu(paksa){
+  try{
+    const j=await api('menu');
+    const sig=JSON.stringify([j.nama,j.buka,j.menu]);
+    if(!paksa&&sig===S.sigM)return;
+    S.sigM=sig;S.nama=j.nama||'Restoran';S.open=j.buka!==false;S.menu=j.menu||[];
+    if(S.err&&!S.owner)S.err='';
+    render(!!paksa);
+  }catch(e){if(paksa||!S.menu.length){S.err=galat(e);render(true)}}
+}
+async function muatPesanan(){
+  if(!S.owner)return;
+  try{
+    const j=await api('pesanan',{},true),sig=JSON.stringify(j.pesanan);
+    if(sig===S.sigO)return;
+    const nos=new Set(j.pesanan.map(o=>o.no));
+    if(S.known){const baru=j.pesanan.filter(o=>o.status!=='selesai'&&!S.known.has(o.no));if(baru.length)bunyi()}
+    S.known=nos;S.sigO=sig;S.orders=j.pesanan;render(false);
+  }catch(e){if(e&&e.code==='auth'){S.err='Sesi berakhir. Masuk lagi.';keluar()}}
+}
+async function mulai(){
+  await muatMenu(true);
+  if(S.cred){
+    try{await api('login',{},true);S.owner=true;S.tab='orders';render(true);muatPesanan()}
+    catch(e){if(e&&e.code==='auth'){S.cred=null;try{localStorage.removeItem('rs-cred')}catch(x){}}}
+  }
+  setInterval(()=>{if(document.hidden)return;muatMenu(false);muatPesanan()},15000);
+  document.addEventListener('visibilitychange',()=>{if(!document.hidden){muatMenu(false);muatPesanan()}});
+}
+render(true);mulai();
+</script>
+</body></html>
